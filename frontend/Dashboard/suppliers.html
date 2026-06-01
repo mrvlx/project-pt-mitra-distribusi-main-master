@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi — Suppliers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --thead-bg:  #F0F2F8;
+      --primary:   #2B5EE8;
+      --primary-lt:#EEF2FD;
+      --green:     #16A34A;
+      --red:       #DC2626;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; font-size: 14px; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 100; padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 20px 16px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child { font-size: 10px; font-weight: 500; color: var(--text-light); letter-spacing: .04em; text-transform: uppercase; }
+    .logo-text span:last-child  { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; color: var(--text-mid); font-weight: 500;
+      font-size: 13.5px; text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover  { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); }
+    .nav-icon {
+      width: 20px; height: 20px; border-radius: 5px;
+      background: currentColor; opacity: .18; flex-shrink: 0;
+    }
+    .nav-item.active .nav-icon { opacity: 1; background: var(--primary); }
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ══ HEADER ══ */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 28px; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .search-bar {
+      flex: 1; max-width: 400px; display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 100px; padding: 8px 16px; color: var(--text-light); font-size: 13px;
+    }
+    .search-icon { width: 16px; height: 16px; background: var(--text-light); border-radius: 50%; flex-shrink: 0;}
+    .search-bar input { border: none; background: transparent; outline: none; color: var(--text-dark); font-family: var(--font); font-size: 13px; width: 100%; }
+    .search-bar input::placeholder { color: var(--text-light); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .notif-btn {
+      width: 36px; height: 36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
+    }
+    .bell-icon { width: 16px; height: 16px; background: var(--text-mid); border-radius: 4px;}
+    .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; overflow: hidden;
+    }
+
+    /* ══ CONTENT ══ */
+    .content { padding: 28px; display: flex; flex-direction: column; gap: 0; }
+
+    /* ══ TABLE CARD ══ */
+    .table-card {
+      background: var(--surface); border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden;
+    }
+
+    /* Page / table header bar */
+    .table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 24px 18px;
+    }
+    .page-title { font-size: 18px; font-weight: 800; color: var(--text-dark); }
+
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-primary {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 20px; background: var(--primary); color: #fff;
+      border: none; border-radius: var(--radius-sm); font-family: var(--font);
+      font-size: 13.5px; font-weight: 700; cursor: pointer; transition: background .15s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: #1F4DC5; }
+    /* ══ TABLE ══ */
+    table { width: 100%; border-collapse: collapse; }
+
+    /* thead — abu-abu keputihan */
+    thead tr {
+      background: var(--thead-bg);
+      border-top: 1px solid var(--border);
+      border-bottom: 2px solid var(--border);
+    }
+    thead th {
+      text-align: left; font-size: 11.5px; font-weight: 700;
+      color: var(--text-mid); padding: 13px 16px;
+      letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+    }
+    thead th:first-child { padding-left: 24px; }
+    thead th:last-child  { padding-right: 24px; text-align: center; }
+
+    /* tbody */
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #FAFBFE; }
+
+    tbody td {
+      padding: 14px 16px; vertical-align: middle;
+      font-size: 13.5px; color: var(--text-dark);
+    }
+    tbody td:first-child { padding-left: 24px; }
+    tbody td:last-child  { padding-right: 24px; text-align: center; }
+
+    /* ── Cell styles ── */
+    .td-supplier { font-weight: 700; color: var(--text-dark); }
+    .td-code     { font-family: var(--mono); font-size: 12.5px; font-weight: 600; color: var(--primary); background: var(--primary-lt); border-radius: 6px; padding: 3px 9px; display: inline-block; }
+    .td-phone    { font-family: var(--mono); font-size: 13px; color: var(--text-mid); }
+    .td-contact  { font-size: 13px; color: var(--text-mid); }
+    .td-category { font-size: 13px; color: var(--text-dark); font-weight: 500; }
+
+    /* Taking Return / Not Taking Return */
+    .status-taking     { font-size: 13px; font-weight: 700; color: var(--green); }
+    .status-not-taking { font-size: 13px; font-weight: 700; color: var(--red); }
+
+    .td-products { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text-dark); }
+    .td-products.dash { color: var(--text-light); font-weight: 400; }
+
+    /* ══ PAGINATION ══ */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-top: 1px solid var(--border);
+    }
+    .pagination-info { font-size: 13px; color: var(--text-light); font-family: var(--mono); }
+    .btn-page {
+      padding: 8px 18px; background: var(--surface); color: var(--text-mid);
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-page:hover    { background: var(--bg); border-color: #c5cbda; }
+    .btn-page:disabled { opacity: .4; cursor: not-allowed; }
+
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main    { margin-left: 0; }
+      .content { padding: 16px; }
+      .table-card { overflow-x: auto; }
+      table { min-width: 780px; }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html">
+      <img src="assets/dashboard.svg" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item" href="inventory.html">
+      <img src="assets/inventory.svg" width="20" height="20"> Inventory
+    </a>
+    <a class="nav-item" href="reports.html">
+      <img src="assets/report.svg" width="20" height="20"> Reports
+    </a>
+    <a class="nav-item active" href="suppliers.html">
+      <img src="assets/supplier.svg" width="20" height="20"> Suppliers
+    </a>
+    <a class="nav-item" href="orders.html">
+      <img src="assets/order.svg" width="20" height="20"> Orders
+    </a>
+    <a class="nav-item" href="warehouse.html">
+      <img src="assets/Warehouse.svg" width="20" height="20"> Warehouse
+    </a>
+    <a class="nav-item" href="purchase.html">
+      <img src="assets/purchase.svg" width="20" height="20"> Purchase Orders
+    </a>
+    <a class="nav-item" href="customers.html">
+      <img src="assets/customer.svg" width="20" height="20"> Customers
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<div class="main">
+
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+
+    <div class="header-right">
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="table-card">
+
+      <div class="table-header">
+        <span class="page-title">Suppliers</span>
+        <div class="header-actions">
+        <button class="btn-primary" onclick="window.location.href='add-supplier.html'">+ Add Supplier</button>
+        </div>
+      </div>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Code</th>
+            <th>Number Phone</th>
+            <th>Contact</th>
+            <th>Category</th>
+            <th>Products Supplied</th>
+          </tr>
+        </thead>
+
+        <tbody id="supplier-tbody">
+          <tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-mid);">Memuat data supplier...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <button class="btn-page" disabled>Previous</button>
+        <span class="pagination-info">Page 1 of 1</span>
+        <button class="btn-page" disabled>Next</button>
+      </div>
+
+    </div></main>
+</div>
+
+<script>
+  const BASE_URL = 'http://localhost:3000';
+
+  async function loadSuppliers() {
+    const tbody = document.getElementById('supplier-tbody');
+    
+    try {
+      const response = await fetch(`${BASE_URL}/pemasok`);
+      
+      if (!response.ok) {
+        throw new Error('Gagal mengambil data dari server');
+      }
+
+      const suppliers = await response.json();
+      
+      tbody.innerHTML = '';
+
+      if (suppliers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-light);">Tidak ada data supplier.</td></tr>`;
+        return;
+      }
+
+      suppliers.forEach(supplier => {
+        const tr = document.createElement('tr');
+        
+        // Format ID menjadi kode SUP-XXX
+        const supplierCode = `SUP-${String(supplier.id_pemasok).padStart(3, '0')}`;
+
+        tr.innerHTML = `
+          <td class="td-supplier">${supplier.nama_pemasok}</td>
+          <td><span class="td-code">${supplierCode}</span></td>
+          <td class="td-phone">${supplier.kontak || '-'}</td>
+          <td class="td-contact">${supplier.email || '-'}</td>
+          <td class="td-category">${supplier.kategori || '-'}</td>
+          <td class="td-products">${supplier.produk_disuplai || '-'}</td>
+        `;
+        
+        tbody.appendChild(tr);
+      });
+
+    } catch (error) {
+      console.error('Error:', error);
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--red); font-weight:600;">Terjadi kesalahan koneksi ke server.</td></tr>`;
+    }
+  }
+
+  // Panggil fungsi saat halaman siap
+  document.addEventListener('DOMContentLoaded', loadSuppliers);
+</script>
+
+</body>
+</html>

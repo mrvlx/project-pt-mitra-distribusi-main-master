@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi - Invoices & Credit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── CSS Variables (Konsisten Penuh dengan dashboard.html Anda) ─── */
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --sidebar-bg:#FFFFFF;
+      --primary:   #3B6AE8;
+      --primary-lt:#EEF2FD;
+      --accent:    #F4A93C;
+      --accent-lt: #FEF4E3;
+      --green:     #2ECC7F;
+      --green-lt:  #E5F9F0;
+      --red:       #E84B3A;
+      --red-lt:    #FDECEA;
+      --purple:    #9B6EE8;
+      --purple-lt: #F2EDFD;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --header-h:  64px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Sidebar (Tema Terang) ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child { font-size: 10px; font-weight: 500; color: var(--text-light); letter-spacing: .04em; text-transform: uppercase; }
+    .logo-text span:last-child { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--text-mid); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); font-weight: 600; }
+
+    .nav-icon {
+      width:20px;
+      height:20px;
+      flex-shrink:0;
+    }
+
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ─── Main Area ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--text-light);
+    }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text-dark); font-family: var(--font); font-size:13px; width:100%; }
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+
+    .profile-widget {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+}
+
+.avatar-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-lt);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.user-info-header {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-info-header .name {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 13px;
+}
+
+.user-info-header .email {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+    /* Content Area */
+    .content {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .page-title h1 { font-size: 20px; font-weight: 700; color: var(--text-dark); }
+    .page-title p { font-size: 13px; color: var(--text-mid); margin-top: 2px; }
+
+    /* ─── KONTEN ATAS: CREDIT LIMIT OVERVIEW (B2B credit Design.png) ─── */
+    .credit-dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .credit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .credit-card .label { font-size: 12px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.02em; }
+    .credit-card .amount { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--text-dark); }
+    .credit-card.accent-card { border-left: 4px solid var(--primary); }
+    .credit-card.warning-card { border-left: 4px solid var(--purple); }
+    .credit-card.success-card { border-left: 4px solid var(--green); }
+
+    /* Progress Bar */
+    .progress-container {
+      width: 100%; background: var(--bg); height: 8px; border-radius: 100px; margin-top: 6px; overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%; background: var(--primary); width: 35%; /* Berdasarkan penggunaan limit di file gambar acuan */
+    }
+
+    /* ─── KONTEN BAWAH: DATA TABEL INVOICES (MyInvoices.png) ─── */
+    .invoice-section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+    .section-header {
+      font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;
+    }
+    
+    .invoice-table {
+      width: 100%; border-collapse: collapse; text-align: left;
+    }
+    .invoice-table th {
+      font-size: 12px; text-transform: uppercase; color: var(--text-light); font-weight: 600; padding-bottom: 14px; border-bottom: 1px solid var(--border); letter-spacing: 0.03em;
+    }
+    .invoice-table td {
+      padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; color: var(--text-dark); vertical-align: middle;
+    }
+    .invoice-table tr:last-child td { border-bottom: none; }
+
+    .id-mono { font-family: var(--mono); font-weight: 600; color: var(--primary); }
+    .val-mono { font-family: var(--mono); font-weight: 600; }
+
+    /* Badges Status Pembayaran */
+    .pay-badge {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600;
+    }
+    .pay-badge.unpaid { color: var(--red); background: var(--red-lt); }
+    .pay-badge.paid { color: var(--green); background: var(--green-lt); }
+
+    /* Action Buttons */
+    .action-group { display: flex; gap: 6px; }
+    .btn-action {
+      background: var(--bg); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: var(--font); font-size: 12.5px; display: inline-flex; align-items: center; gap: 4px; transition: background 0.15s; color: var(--text-dark);
+    }
+    .btn-action:hover { background: var(--border); }
+    .btn-action.btn-download-primary { background: var(--primary-lt); color: var(--primary); border-color: #CBD7F9; }
+    .btn-action.btn-download-primary:hover { background: #DFE6FC; }
+
+    /* ─── MODAL 1: PREVIEW INVOICE (Saat Tombol Mata Ditekan) ─── */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(26, 29, 46, 0.4); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px);
+    }
+    .modal-container {
+      background: var(--surface); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 550px; max-width: 90%; overflow: hidden; animation: modalSlide 0.2s ease-out;
+    }
+    @keyframes modalSlide { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h2 { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+    .btn-close-modal { background: none; border: none; font-size: 22px; color: var(--text-light); cursor: pointer; }
+    
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    
+    .invoice-bill-box {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: var(--bg); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 13px;
+    }
+    .bill-title { font-size: 11px; text-transform: uppercase; color: var(--text-light); font-weight: 700; margin-bottom: 4px; }
+
+    .modal-table { width: 100%; border-collapse: collapse; margin-top: 8px; text-align: left; }
+    .modal-table th { font-size: 11.5px; color: var(--text-light); border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 600; }
+    .modal-table td { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+    .modal-footer-summary { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 12px; }
+    .pop-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-mid); }
+    .pop-row.grand { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-top: 4px; }
+
+    /* ─── MODAL 2: NOTIFIKASI UNDUH SUKSES (Tampilan Khusus Aksi Download) ─── */
+    .download-toast {
+      position: fixed; bottom: 24px; right: 24px; background: #1A1D2E; color: #FFFFFF; padding: 14px 20px; border-radius: var(--radius-sm); box-shadow: 0 4px 16px rgba(0,0,0,0.2); display: none; align-items: center; gap: 12px; z-index: 2000; animation: toastSlide 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes toastSlide { from { transform: translateY(30px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    .toast-icon { width: 24px; height: 24px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+    .toast-msg { font-size: 13px; font-weight: 500; }
+
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .credit-dashboard-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR (PORTAL PELANGGAN - LINK SINKRON) ══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+   <nav class="sidebar-nav">
+    <a class="nav-item" href="customer_dashboard.html">
+      <img src="assets/dashboard.svg" class="nav-icon" onerror="this.style.display='none'"> Dashboard
+    </a>
+    <a class="nav-item" href="catalog.html">
+      <img src="assets/katalog.svg" class="nav-icon" onerror="this.style.display='none'"> Browse Catalog
+    </a>
+    <a class="nav-item" href="cart.html">
+      <img src="assets/purchase.svg" class="nav-icon" onerror="this.style.display='none'"> My Cart
+    </a>
+    <a class="nav-item" href="my-orders.html">
+      <img src="assets/order.svg" class="nav-icon" onerror="this.style.display='none'"> My Orders
+    </a>
+    <a class="nav-item active" href="invoices.html">
+      <img src="assets/invoices.svg" class="nav-icon" onerror="this.style.display='none'"> Invoices &amp; Credit
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" class="nav-icon" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" class="nav-icon" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+
+<!-- ══════════ MAIN AREA ══════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Cari produk populer, kategori, atau nomor pesanan...">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- User Profile Widget -->
+      <div class="profile-widget">
+        <div class="avatar-wrapper">B</div>
+        <div class="user-info-header">
+          <span class="name">Budi Santoso</span>
+          <span class="email">budi@sejahtera.co.id</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- Content Container -->
+  <main class="content">
+    
+    <!-- Page Title -->
+    <div class="page-title">
+      <h1>Invoices &amp; Credit</h1>
+      <p>Kelola pagu kredit plafon tempo B2B Anda serta unduh berkas administrasi faktur penjualan</p>
+    </div>
+
+    <!-- ─── ATAS: DASHBOARD CREDIT PLAFON (Sesuai B2B credit Design.png) ─── -->
+    <div class="credit-dashboard-grid">
+      
+      <!-- Card 1: Total Plafon Kredit -->
+      <div class="credit-card accent-card">
+        <div class="label">Total Credit Limit</div>
+        <div class="amount">Rp 25.000.000</div>
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+        <span style="font-size: 11.5px; color: var(--text-light); margin-top: 2px;">Tingkat penggunaan: 35%</span>
+      </div>
+
+      <!-- Card 2: Kredit yang Digunakan -->
+      <div class="credit-card warning-card">
+        <div class="label">Credit Used (Outstanding)</div>
+        <div class="amount">Rp 8.750.000</div>
+        <span style="font-size: 11.5px; color: var(--purple); font-weight: 500;">Termasuk 1 tagihan berjalan</span>
+      </div>
+
+      <!-- Card 3: Sisa Saldo Kredit -->
+      <div class="credit-card success-card">
+        <div class="label">Available Credit Limit</div>
+        <div class="amount">Rp 16.250.000</div>
+        <span style="font-size: 11.5px; color: var(--green); font-weight: 500;">✓ Siap digunakan untuk pesanan baru</span>
+      </div>
+
+    </div>
+
+    <!-- ─── BAWAH: DAFTAR DATA INVOICES (Sesuai MyInvoices.png) ─── -->
+    <div class="invoice-section-card">
+      <div class="section-header">
+        <span>Riwayat Invoice Penjualan</span>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Nomor Invoice</th>
+            <th>Tanggal Terbit</th>
+            <th>Jatuh Tempo</th>
+            <th>Total Tagihan</th>
+            <th>Status Bayar</th>
+            <th>Aksi Berkas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Baris 1: Invoice Belum Dibayar -->
+          <tr>
+            <td><span class="id-mono">#INV-2026-0411</span></td>
+            <td>28 Mei 2026</td>
+            <td>27 Juni 2026</td>
+            <td><span class="val-mono">Rp 832.500</span></td>
+            <td><span class="pay-badge unpaid">● Belum Dibayar</span></td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action" onclick="openInvoicePreview('#INV-2026-0411', 'Rp 832.500', 'Belum Dibayar')">
+                  <img src="assets/Action.svg" width="20" height="20"> Detail
+                </button>
+                <button class="btn-action btn-download-primary" onclick="triggerDownload('#INV-2026-0411')">
+                  <img src="assets/Unduh.svg" width="20" height="20"> Unduh PDF
+                </button>
+              </div>
+            </td>
+          </tr>
+          <!-- Baris 2: Invoice Sudah Dibayar -->
+          <tr>
+            <td><span class="id-mono">#INV-2026-0390</span></td>
+            <td>15 Mei 2026</td>
+            <td>14 Juni 2026</td>
+            <td><span class="val-mono">Rp 2.450.000</span></td>
+            <td><span class="pay-badge paid">● Lunas</span></td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action" onclick="openInvoicePreview('#INV-2026-0390', 'Rp 2.450.000', 'Lunas')">
+                  <img src="assets/Action.svg" width="20" height="20"> Detail
+                </button>
+                <button class="btn-action btn-download-primary" onclick="triggerDownload('#INV-2026-0390')">
+                  <img src="assets/Unduh.svg" width="20" height="20"> Unduh PDF
+                </button>
+              </div>
+            </td>
+          </tr>
+          <!-- Baris 3: Invoice Lunas Lama -->
+          <tr>
+            <td><span class="id-mono">#INV-2026-0214</span></td>
+            <td>02 Mei 2026</td>
+            <td>01 Juni 2026</td>
+            <td><span class="val-mono">Rp 5.120.000</span></td>
+            <td><span class="pay-badge paid">● Lunas</span></td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action" onclick="openInvoicePreview('#INV-2026-0214', 'Rp 5.120.000', 'Lunas')">
+                  <img src="assets/Action.svg" width="20" height="20"> Detail
+                </button>
+                <button class="btn-action btn-download-primary" onclick="triggerDownload('#INV-2026-0214')">
+                  <img src="assets/Unduh.svg" width="20" height="20"> Unduh PDF
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════ MODAL 1: PREVIEW INVOICE DETIL (Saat Klik Mata) ══════════ -->
+<div class="modal-backdrop" id="invoiceModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="modalInvoiceTitle">Pratinjau Dokumen Faktur</h2>
+      <button class="btn-close-modal" onclick="closeInvoicePreview()">&times;</button>
+    </div>
+    <div class="modal-body">
+      
+      <div class="invoice-bill-box">
+        <div>
+          <div class="bill-title">Penerbit</div>
+          <strong>PT Mitra Distribusi</strong><br>
+          Dept. Finance Logistik<br>
+          Jakarta Utara
+        </div>
+        <div>
+          <div class="bill-title">Ditagihkan Kepada</div>
+          <strong>Toko Kelontong Sejahtera</strong><br>
+          ID Pelanggan: CUST-8910<br>
+          Jakarta Selatan
+        </div>
+      </div>
+
+      <div>
+        <div class="bill-title">Rincian Komoditas / Barang</div>
+        <table class="modal-table">
+          <thead>
+            <tr>
+              <th>Deskripsi Item</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Beras Premium Staples 5kg Bag</td>
+              <td style="text-align: center;">10</td>
+              <td style="text-align: right; font-family: var(--mono);">Rp 750.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer-summary">
+        <div class="pop-row">
+          <span>Subtotal DPP</span>
+          <span style="font-family: var(--mono);">Rp 750.000</span>
+        </div>
+        <div class="pop-row">
+          <span>Pajak PPN 11%</span>
+          <span style="font-family: var(--mono);">Rp 82.500</span>
+        </div>
+        <div class="pop-row grand">
+          <span>Total Nilai Tagihan</span>
+          <span id="modalGrandTotal" style="font-family: var(--mono); color: var(--primary);">Rp 832.500</span>
+        </div>
+        <div class="pop-row" style="margin-top: 6px;">
+          <span>Status Konfirmasi</span>
+          <strong id="modalStatusBadge" style="color: var(--red);">Belum Dibayar</strong>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL 2: NOTIFIKASI/TOAST UNDUH BERKAS (Tampilan Interaktif Aksi Unduh) ══════════ -->
+<div class="download-toast" id="downloadToast">
+  <div class="toast-icon">✓</div>
+  <div class="toast-msg">
+    <span id="toastFilename" style="font-weight: 700; display: block;">#INV-2026-0411.pdf</span>
+    Berhasil diunduh ke direktori penyimpanan lokal Anda.
+  </div>
+</div>
+
+<!-- JavaScript Interaktivitas Kontrol Komponen Modul -->
+<script>
+  // Kontrol Modal Pratinjau Mata
+  const invModal = document.getElementById('invoiceModal');
+  const modalInvoiceTitle = document.getElementById('modalInvoiceTitle');
+  const modalGrandTotal = document.getElementById('modalGrandTotal');
+  const modalStatusBadge = document.getElementById('modalStatusBadge');
+
+  function openInvoicePreview(invNumber, totalAmount, status) {
+    modalInvoiceTitle.innerText = "Pratinjau Dokumen Faktur " + invNumber;
+    modalGrandTotal.innerText = totalAmount;
+    modalStatusBadge.innerText = status;
+    
+    if(status === 'Lunas') {
+      modalStatusBadge.style.color = 'var(--green)';
+    } else {
+      modalStatusBadge.style.color = 'var(--red)';
+    }
+    
+    invModal.style.display = 'flex';
+  }
+
+  function closeInvoicePreview() {
+    invModal.style.display = 'none';
+  }
+
+  // Kontrol Aksi Tombol Unduh Berkas Faktur Pajak & PDF
+  const toast = document.getElementById('downloadToast');
+  const toastFilename = document.getElementById('toastFilename');
+
+  function triggerDownload(invNumber) {
+    toastFilename.innerText = "Mengunduh berkas: " + invNumber + ".pdf";
+    toast.style.display = 'flex';
+    
+    // Toast otomatis bersembunyi setelah 3.5 detik berjalan seakan proses download selesai
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 3500);
+  }
+
+  // Klik di luar container untuk menutup modal preview dokumen
+  window.onclick = function(event) {
+    if (event.target == invModal) {
+      invModal.style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>

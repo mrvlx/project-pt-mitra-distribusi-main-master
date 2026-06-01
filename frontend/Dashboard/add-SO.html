@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambah Sales Order - PT Mitra Distribusi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F4F6FB;
+      --surface: #FFFFFF;
+      --primary: #2B5EE8;
+      --text-dark: #1A1D2E;
+      --text-mid: #5A607A;
+      --border: #E8ECF4;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(30,40,80,.07);
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font); background: var(--bg); padding: 40px; color: var(--text-dark); }
+    .container { max-width: 700px; margin: auto; }
+    .page-title { font-size: 28px; font-weight: 800; margin-bottom: 24px; }
+    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 32px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 14px; font-weight: 600; color: var(--text-mid); }
+    input, select, textarea {
+      width: 100%; padding: 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      outline: none; font-family: var(--font); font-size: 14px;
+      transition: .2s; background: white;
+    }
+    input:focus, select:focus { border-color: var(--primary); }
+    .button-group { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+    .btn { padding: 14px 20px; border: none; border-radius: 10px; font-family: var(--font); font-weight: 700; cursor: pointer; transition: .2s; text-decoration: none; font-size: 14px; }
+    .btn-secondary { background: #E9EDF7; color: var(--text-dark); }
+    .btn-secondary:hover { background: #DCE3F2; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #1F4DC5; }
+    .message { margin-top: 20px; padding: 14px; border-radius: 10px; font-size: 14px; display: none; }
+    .success { background: #E5F9F0; color: #2ECC71; }
+    .error { background: #FDECEA; color: #E74C3C; }
+
+    /* Badge status */
+    .badge-info { font-size: 12px; color: var(--text-mid); background: var(--bg); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); display: inline-block; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="page-title">Tambah Sales Order</h1>
+
+  <div class="card">
+    <form id="formTambahSO">
+      <div class="form-grid">
+
+        <!-- Tanggal SO -->
+        <div class="form-group">
+          <label>Tanggal SO</label>
+          <input type="date" id="tanggal_so" required>
+        </div>
+
+        <!-- Jatuh Tempo -->
+        <div class="form-group">
+          <label>Jatuh Tempo</label>
+          <input type="date" id="jatuh_tempo" required>
+        </div>
+
+        <!-- ID Pelanggan -->
+        <div class="form-group">
+          <label>ID Pelanggan</label>
+          <input type="number" id="id_pelanggan" placeholder="Contoh: 1" required>
+        </div>
+
+        <!-- ID Gudang -->
+        <div class="form-group">
+          <label>ID Gudang</label>
+          <input type="number" id="id_gudang" placeholder="Contoh: 1" required>
+        </div>
+
+        <!-- Total Bayar -->
+        <div class="form-group">
+          <label>Total Bayar (Rp)</label>
+          <input type="number" id="total_bayar" placeholder="Contoh: 500000" min="0" required>
+        </div>
+
+        <!-- Status SO -->
+        <div class="form-group">
+          <label>Status SO</label>
+          <select id="status_so" required>
+            <option value="Draft">Draft</option>
+            <option value="Processed">Processed</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+
+        <!-- Status Bayar -->
+        <div class="form-group full">
+          <label>Status Bayar</label>
+          <select id="status_bayar" required>
+            <option value="Belum Lunas">Belum Lunas</option>
+            <option value="Lunas">Lunas</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="button-group">
+        <!-- Tombol kembali -->
+<a href="orders.html" class="btn btn-secondary">Kembali</a>
+        <button type="submit" class="btn btn-primary">Simpan Sales Order</button>
+      </div>
+    </form>
+
+    <div id="message-box" class="message"></div>
+  </div>
+</div>
+
+<script>
+const BASE_URL = 'http://localhost:3000';
+const messageBox = document.getElementById('message-box');
+
+// Set default tanggal hari ini
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('tanggal_so').value = today;
+
+// Set default jatuh tempo 30 hari dari sekarang
+const next30 = new Date();
+next30.setDate(next30.getDate() + 30);
+document.getElementById('jatuh_tempo').value = next30.toISOString().split('T')[0];
+
+document.getElementById('formTambahSO').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const data = {
+    tanggal_so:   document.getElementById('tanggal_so').value,
+    id_pelanggan: parseInt(document.getElementById('id_pelanggan').value),
+    id_gudang:    parseInt(document.getElementById('id_gudang').value),
+    total_bayar:  parseFloat(document.getElementById('total_bayar').value),
+    status_so:    document.getElementById('status_so').value,
+    status_bayar: document.getElementById('status_bayar').value,
+    jatuh_tempo:  document.getElementById('jatuh_tempo').value,
+  };
+
+  try {
+    const response = await fetch(`${BASE_URL}/sales-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      messageBox.style.display = 'block';
+      messageBox.className = 'message success';
+      messageBox.innerHTML = 'Sales order berhasil ditambahkan!';
+
+      document.getElementById('formTambahSO').reset();
+
+   // Redirect setelah sukses
+    setTimeout(() => {
+      window.location.href = 'orders.html';
+    }, 1500);
+
+    } else {
+      messageBox.style.display = 'block';
+      messageBox.className = 'message error';
+      messageBox.innerHTML = result.message || 'Gagal menambahkan sales order';
+    }
+
+  } catch (error) {
+    console.error(error);
+    messageBox.style.display = 'block';
+    messageBox.className = 'message error';
+    messageBox.innerHTML = 'Terjadi kesalahan server';
+  }
+});
+</script>
+
+</body>
+</html>

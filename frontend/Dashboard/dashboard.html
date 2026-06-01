@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── CSS Variables ─── */
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --sidebar-bg:#FFFFFF;
+      --primary:   #3B6AE8;
+      --primary-lt:#EEF2FD;
+      --accent:    #F4A93C;
+      --accent-lt: #FEF4E3;
+      --green:     #2ECC7F;
+      --green-lt:  #E5F9F0;
+      --red:       #E84B3A;
+      --red-lt:    #FDECEA;
+      --purple:    #9B6EE8;
+      --purple-lt: #F2EDFD;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --header-h:  64px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+
+    /* Logo placeholder */
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .logo-text span:first-child {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-light);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .logo-text span:last-child {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--text-mid); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active {
+      background: var(--primary-lt);
+      color: var(--primary);
+    }
+    .nav-icon {
+      width:20px; height:20px; border-radius:5px;
+      flex-shrink:0;
+    }
+    .nav-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .nav-item.active .nav-icon { opacity:1; background: var(--primary); }
+
+    .sidebar-footer {
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* ─── Main ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--text-light);
+    }
+    .search-icon { width:16px; height:16px; border-radius:50%; flex-shrink:0; }
+    .search-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text-dark); font-family: var(--font); font-size:13px; width:100%; }
+    .search-bar input::placeholder { color: var(--text-light); }
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .bell-icon { width:16px; height:16px; border-radius:4px; }
+    .bell-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+    .avatar {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; overflow: hidden;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ─── Content ─── */
+    .content {
+      padding: 28px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .left-col { display: flex; flex-direction: column; gap: 24px; }
+    .right-col { display: flex; flex-direction: column; gap: 24px; }
+
+    /* ─── Card base ─── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 18px;
+    }
+
+    /* ─── Sales Overview ─── */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .overview-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Asset icon placeholder */
+    .ov-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+    }
+    .ov-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .ov-icon.sales    { background: var(--primary-lt); color: var(--primary); }
+    .ov-icon.revenue  { background: var(--green-lt);   color: var(--green);   }
+    .ov-icon.profit   { background: var(--accent-lt);  color: var(--accent);  }
+
+    .ov-info label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-light);
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .ov-info .ov-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-dark);
+      font-family: var(--mono);
+    }
+
+    /* ─── Sales & Purchase Chart ─── */
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .btn-outline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: var(--font);
+    }
+
+    /* Chart area placeholder */
+    .chart-area {
+      height: 200px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      padding: 16px 12px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Y-axis labels */
+    .chart-y-labels {
+      position: absolute;
+      left: 0; top: 0; bottom: 24px;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+    .chart-y-labels span {
+      font-size: 10px;
+      color: var(--text-light);
+      font-family: var(--mono);
+    }
+
+    /* Bar group placeholder */
+    .bar-group {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 100%;
+    }
+    .bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+    }
+    .bar.purchase { background: var(--primary); opacity: .55; }
+    .bar.sale     { background: var(--green);   opacity: .85; }
+
+    /* X-axis */
+    .chart-x-labels {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .chart-x-labels span {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-light);
+      font-family: var(--mono);
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-mid); font-weight: 500;
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 3px;
+    }
+    .legend-dot.purchase { background: var(--primary); opacity: .6; }
+    .legend-dot.sale     { background: var(--green); }
+
+    /* ─── Top Selling Stock Table ─── */
+    .table-header-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .link-see-all {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-light);
+      padding: 0 0 12px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: .03em;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+    tbody td {
+      padding: 13px 0;
+      font-size: 13.5px;
+      color: var(--text-dark);
+    }
+    td.product-name { font-weight: 600; }
+    td.num { font-family: var(--mono); font-size: 13px; }
+    td.price { font-family: var(--mono); font-weight: 600; color: var(--primary); }
+
+    /* ─── Right col: Inventory Summary ─── */
+    .inv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .inv-item {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    /* Asset icon placeholder */
+    .inv-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--primary-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: var(--primary);
+      /* Replace with: <img src="icon-qty.svg"> */
+    }
+    .inv-icon.recv { background: var(--purple-lt); color: var(--purple); }
+
+    .inv-value {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--mono);
+      color: var(--text-dark);
+    }
+    .inv-label {
+      font-size: 11px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    /* ─── Product Summary ─── */
+    .prod-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .prod-item {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    /* Asset icon placeholder */
+    .prod-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--accent-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: var(--accent);
+      /* Replace with: <img src="icon-supplier.svg"> */
+    }
+    .prod-icon.cat { background: var(--green-lt); color: var(--green); }
+
+    .prod-value {
+      font-size: 22px; font-weight: 700;
+      font-family: var(--mono); color: var(--text-dark);
+    }
+    .prod-label {
+      font-size: 11px; color: var(--text-light); font-weight: 500;
+    }
+
+    /* ─── Low Quantity Stock ─── */
+    .low-stock-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .low-stock-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    /* Product image placeholder */
+    .product-thumb {
+      width: 42px; height: 42px;
+      border-radius: var(--radius-sm);
+      background: var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: var(--text-light); font-weight: 600;
+      text-align: center;
+      overflow: hidden;
+      /* Replace with: <img src="product-img.jpg"> */
+    }
+
+    .low-stock-info { flex: 1; min-width: 0; }
+    .low-stock-name {
+      font-size: 13px; font-weight: 600; color: var(--text-dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .low-stock-qty {
+      font-size: 11px; color: var(--text-light); margin-top: 2px;
+    }
+
+    .badge-low {
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 100px;
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+
+    /* ─── Responsive tweak ─── */
+    @media (max-width: 960px) {
+      .content { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar">
+
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <a class="nav-item active" href="dashboard.html">
+      <img src="assets/dashboard.svg" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item" href="inventory.html">
+      <img src="assets/inventory.svg" width="20" height="20"> Inventory
+    </a>
+    <a class="nav-item" href="reports.html">
+      <img src="assets/report.svg" width="20" height="20"> Reports
+    </a>
+    <a class="nav-item" href="suppliers.html">
+      <img src="assets/supplier.svg" width="20" height="20"> Suppliers
+    </a>
+    <a class="nav-item" href="orders.html">
+      <img src="assets/order.svg" width="20" height="20"> Orders
+    </a>
+    <a class="nav-item" href="warehouse.html">
+      <img src="assets/Warehouse.svg" width="20" height="20"> Warehouse
+    </a>
+    <a class="nav-item" href="purchase.html">
+      <img src="assets/purchase.svg" width="20" height="20"> Purchase Orders
+    </a>
+    <a class="nav-item" href="customers.html">
+      <img src="assets/customer.svg" width="20" height="20"> Customers
+    </a>
+  </nav>
+
+  <!-- Footer nav -->
+  <div class="sidebar-footer">
+    <a class="nav-item" href="#">
+      <img src="assets/setting.svg" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- Avatar user -->
+      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- ── LEFT COLUMN ── -->
+    <div class="left-col">
+
+      <!-- Sales Overview -->
+      <div class="card">
+        <div class="card-title">Sales Overview</div>
+        <div class="overview-grid">
+
+          <div class="overview-item">
+            <img src="assets/sales.svg" width="44" height="44">
+            <div class="ov-info">
+              <label>Sales</label>
+              <span class="ov-value">Rp 832</span>
+            </div>
+          </div>
+
+          <div class="overview-item">
+            <img src="assets/revenue.svg" width="44" height="44">
+            <div class="ov-info">
+              <label>Revenue</label>
+              <span class="ov-value">Rp 18,300</span>
+            </div>
+          </div>
+
+          <div class="overview-item">
+            <img src="assets/profit.svg" width="44" height="44">
+            <div class="ov-info">
+              <label>Profit</label>
+              <span class="ov-value">Rp 868</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Sales & Purchase Chart -->
+      <div class="card">
+        <div class="chart-header">
+          <span class="card-title" style="margin-bottom:0">Sales &amp; Purchase</span>
+          <button class="btn-outline">
+            <img src="assets/weekly.svg" width="16" height="16">Weekly
+          </button>
+        </div>
+
+       <div style="position:relative; height:200px; width:100%;">
+  <canvas id="salesChart"></canvas>
+</div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot purchase"></div> Purchase</div>
+          <div class="legend-item"><div class="legend-dot sale"></div> Sales</div>
+        </div>
+      </div>
+
+      <!-- Top Selling Stock -->
+      <div class="card">
+        <div class="table-header-row">
+          <span class="card-title" style="margin-bottom:0">Top Selling Stock</span>
+          <a class="link-see-all" href="#">See All</a>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Sold Quantity</th>
+              <th>Remaining Quantity</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="product-name">Surf Excel</td>
+              <td class="num">30</td>
+              <td class="num">12</td>
+              <td class="price">Rp 100</td>
+            </tr>
+            <tr>
+              <td class="product-name">Rin</td>
+              <td class="num">21</td>
+              <td class="num">15</td>
+              <td class="price">Rp 207</td>
+            </tr>
+            <tr>
+              <td class="product-name">Tata Salt</td>
+              <td class="num">18</td>
+              <td class="num">10</td>
+              <td class="price">Rp 55</td>
+            </tr>
+            <tr>
+              <td class="product-name">Lays Original</td>
+              <td class="num">15</td>
+              <td class="num">15</td>
+              <td class="price">Rp 120</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /left-col -->
+
+    <!-- ── RIGHT COLUMN ── -->
+    <div class="right-col">
+
+      <!-- Inventory Summary -->
+      <div class="card">
+        <div class="card-title">Inventory Summary</div>
+        <div class="inv-grid">
+          <div class="inv-item">
+            <img src="assets/quantity.svg" width="30" height="30">
+            <span class="inv-value">868</span>
+            <span class="inv-label">Quantity in Hand</span>
+          </div>
+          <div class="inv-item">
+            <img src="assets/to be recieve.svg" width="30" height="30">
+            <span class="inv-value">200</span>
+            <span class="inv-label">To be received</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Summary -->
+      <div class="card">
+        <div class="card-title">Product Summary</div>
+        <div class="prod-grid">
+          <div class="prod-item">
+            <img src="assets/number  suppliers.svg" width="30" height="30">
+            <span class="prod-value">31</span>
+            <span class="prod-label">Number of Suppliers</span>
+          </div>
+          <div class="prod-item">
+            <img src="assets/Categories.svg" width="30" height="30">
+            <span class="prod-value">21</span>
+            <span class="prod-label">Number of Categories</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Quantity Stock -->
+      <div class="card">
+        <div class="table-header-row">
+          <span class="card-title" style="margin-bottom:0">Low Quantity Stock</span>
+          <a class="link-see-all" href="#">See All</a>
+        </div>
+        <div class="low-stock-list">
+
+          <div class="low-stock-item">
+            <!-- ASET: ganti <div class="product-thumb"> dengan <img src="tata-salt.jpg"> -->
+            <div class="product-thumb">IMG</div>
+            <div class="low-stock-info">
+              <div class="low-stock-name">Tata Salt</div>
+              <div class="low-stock-qty">Remaining Quantity : 10 Packet</div>
+            </div>
+            <span class="badge-low">Low</span>
+          </div>
+
+          <div class="low-stock-item">
+            <!-- ASET: ganti <div class="product-thumb"> dengan <img src="lays.jpg"> -->
+            <div class="product-thumb">IMG</div>
+            <div class="low-stock-info">
+              <div class="low-stock-name">Lays</div>
+              <div class="low-stock-qty">Remaining Quantity : 15 Packet</div>
+            </div>
+            <span class="badge-low">Low</span>
+          </div>
+
+          <div class="low-stock-item">
+            <!-- ASET: ganti <div class="product-thumb"> dengan <img src="lays-2.jpg"> -->
+            <div class="product-thumb">IMG</div>
+            <div class="low-stock-info">
+              <div class="low-stock-name">Lays</div>
+              <div class="low-stock-qty">Remaining Quantity : 15 Packet</div>
+            </div>
+            <span class="badge-low">Low</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /right-col -->
+
+  </main>
+</div><!-- /main -->
+
+<script>
+const API = 'http://localhost:3000';
+
+async function loadSalesOverview() {
+  const [orders, details] = await Promise.all([
+    fetch(`${API}/sales-order`).then(r => r.json()),
+    fetch(`${API}/detail-item-so`).then(r => r.json()),
+  ]);
+
+  const revenue = orders.reduce((sum, o) => sum + Number(o.total_bayar), 0);
+  const sales = details.reduce((sum, d) => sum + Number(d.subtotal), 0);
+  const profit = revenue - sales;
+
+  const ovValues = document.querySelectorAll('.ov-value');
+  ovValues[0].textContent = 'Rp ' + sales.toLocaleString('id-ID');
+  ovValues[1].textContent = 'Rp ' + revenue.toLocaleString('id-ID');
+  ovValues[2].textContent = 'Rp ' + profit.toLocaleString('id-ID');
+}
+
+loadSalesOverview();
+async function loadTopSelling() {
+  const [details, produk] = await Promise.all([
+    fetch(`${API}/detail-item-so`).then(r => r.json()),
+    fetch(`${API}/produk`).then(r => r.json()),
+  ]);
+
+  const produkMap = {};
+  produk.forEach(p => produkMap[p.id_produk] = p);
+
+  // Sum qty per produk
+  const soldMap = {};
+  details.forEach(d => {
+    if (!soldMap[d.id_produk]) soldMap[d.id_produk] = 0;
+    soldMap[d.id_produk] += d.qty;
+  });
+
+  // Sort by qty terjual
+  const sorted = Object.entries(soldMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+
+  const tbody = document.querySelector('tbody');
+  tbody.innerHTML = '';
+
+  sorted.forEach(([id_produk, qty]) => {
+    const p = produkMap[id_produk];
+    if (!p) return;
+    tbody.innerHTML += `
+      <tr>
+        <td class="product-name">${p.nama_produk}</td>
+        <td class="num">${qty}</td>
+        <td class="num">${p.stok_total}</td>
+        <td class="price">Rp ${Number(p.harga_jual).toLocaleString('id-ID')}</td>
+      </tr>
+    `;
+  });
+}
+
+loadTopSelling();
+async function loadInventorySummary() {
+  const [produk, detailPo] = await Promise.all([
+    fetch(`${API}/produk`).then(r => r.json()),
+    fetch(`${API}/detail-item-po`).then(r => r.json()),
+  ]);
+
+  // Quantity in Hand = total stok semua produk
+  const qtyInHand = produk.reduce((sum, p) => sum + p.stok_total, 0);
+
+  // To be received = total qty dari PO yang belum diterima
+  const toBeReceived = detailPo.reduce((sum, d) => sum + d.qty, 0);
+
+  const invValues = document.querySelectorAll('.inv-value');
+  invValues[0].textContent = qtyInHand.toLocaleString('id-ID');
+  invValues[1].textContent = toBeReceived.toLocaleString('id-ID');
+}
+
+loadInventorySummary();
+async function loadProductSummary() {
+  const [pemasok, kategori] = await Promise.all([
+    fetch(`${API}/pemasok`).then(r => r.json()),
+    fetch(`${API}/kategori`).then(r => r.json()),
+  ]);
+
+  const prodValues = document.querySelectorAll('.prod-value');
+  prodValues[0].textContent = pemasok.length;
+  prodValues[1].textContent = kategori.length;
+}
+
+loadProductSummary();
+async function loadLowStock() {
+  const produk = await fetch(`${API}/produk`).then(r => r.json());
+
+  const lowStock = produk
+    .filter(p => p.stok_total < 100)
+    .sort((a, b) => a.stok_total - b.stok_total)
+    .slice(0, 3);
+
+  const list = document.querySelector('.low-stock-list');
+  list.innerHTML = '';
+
+  if (lowStock.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-light);font-size:13px;">Tidak ada produk low stock.</p>';
+    return;
+  }
+
+  lowStock.forEach(p => {
+    list.innerHTML += `
+      <div class="low-stock-item">
+        <div class="product-thumb">IMG</div>
+        <div class="low-stock-info">
+          <div class="low-stock-name">${p.nama_produk}</div>
+          <div class="low-stock-qty">Remaining Quantity : ${p.stok_total} Packet</div>
+        </div>
+        <span class="badge-low">Low</span>
+      </div>
+    `;
+  });
+}
+
+loadLowStock();
+async function loadSalesChart() {
+  const [salesOrders, purchaseOrders] = await Promise.all([
+    fetch(`${API}/sales-order`).then(r => r.json()),
+    fetch(`${API}/purchase-order`).then(r => r.json()),
+  ]);
+
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const salesData = new Array(12).fill(0);
+  const purchaseData = new Array(12).fill(0);
+
+  salesOrders.forEach(o => {
+    const m = new Date(o.tanggal_so).getMonth();
+    salesData[m] += Number(o.total_bayar);
+  });
+
+  purchaseOrders.forEach(o => {
+    const m = new Date(o.tanggal_po).getMonth();
+    purchaseData[m] += Number(o.total_bayar);
+  });
+
+  new Chart(document.getElementById('salesChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [
+        {
+          label: 'Purchase',
+          data: purchaseData,
+          backgroundColor: 'rgba(59,106,232,0.55)',
+          borderRadius: 4,
+        },
+        {
+          label: 'Sales',
+          data: salesData,
+          backgroundColor: 'rgba(46,204,127,0.85)',
+          borderRadius: 4,
+        }
+      ]
+    },
+   options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+         grid: { color: '#E8ECF4' },
+          ticks: { color: '#9AA3B8', font: { family: 'DM Mono', size: 10 } }
+    },
+        x: {
+          grid: { display: false },
+          ticks: {
+          color: '#9AA3B8',
+          font: { family: 'DM Mono', size: 10 },
+          maxRotation: 0,
+          autoSkip: false
+      }
+    }
+  },
+  barPercentage: 0.6,
+  categoryPercentage: 0.7,
+    }
+  });
+}
+
+loadSalesChart();
+</script>
+
+</body>
+</html>

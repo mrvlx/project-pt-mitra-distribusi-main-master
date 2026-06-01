@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi - Customer Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── CSS Variables (Konsisten dengan Tema Admin Dashboard) ─── */
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --sidebar-bg:#FFFFFF; /* Diubah ke putih agar konsisten dengan tema file HTML yang diberikan */
+      --primary:   #3B6AE8;
+      --primary-lt: #EEF2FD;
+      --accent:    #F4A93C;
+      --accent-lt: #FEF4E3;
+      --green:     #2ECC7F;
+      --green-lt:  #E5F9F0;
+      --red:       #E84B3A;
+      --red-lt:    #FDECEA;
+      --purple:    #9B6EE8;
+      --purple-lt: #F2EDFD;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --header-h:  64px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .logo-text span:first-child {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-light);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .logo-text span:last-child {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--text-mid); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active {
+      background: var(--primary-lt);
+      color: var(--primary);
+    }
+    .nav-icon { width:20px; height:20px; flex-shrink:0; }
+
+    .sidebar-footer {
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* ─── Main ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--text-light);
+    }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text-dark); font-family: var(--font); font-size:13px; width:100%; }
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+    
+    /* Profile Widget dari .png disesuaikan tema */
+    .profile-widget {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 8px;
+    }
+    .avatar-wrapper {
+      width:36px; height:36px; border-radius:50%;
+      background: var(--primary-lt); color: var(--primary);
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 700; font-size: 14px; overflow: hidden;
+    }
+    .user-info-header {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .user-info-header .name { font-weight: 600; color: var(--text-dark); font-size: 13px; }
+    .user-info-header .email { font-size: 11px; color: var(--text-light); }
+
+    /* ─── Content ─── */
+    .content {
+      padding: 28px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .left-col { display: flex; flex-direction: column; gap: 24px; }
+    .right-col { display: flex; flex-direction: column; gap: 24px; }
+
+    /* ─── Card base ─── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 18px;
+    }
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: -14px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    /* ─── Welcome Banner ─── */
+    .welcome-banner {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 14px rgba(59, 106, 232, 0.2);
+    }
+    .welcome-text h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.2px; }
+    .welcome-text p { font-size: 13.5px; opacity: 0.9; font-weight: 400; }
+    .btn-primary {
+      background: #FFFFFF;
+      color: var(--primary);
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font);
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.95; }
+
+    /* ─── Customer Metrics Grid ─── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+    .metric-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .metric-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .metric-icon.cart { background: var(--primary-lt); color: var(--primary); }
+    .metric-icon.transit { background: var(--green-lt); color: var(--green); }
+    .metric-icon.credit { background: var(--purple-lt); color: var(--purple); }
+    .metric-icon.outstanding { background: var(--red-lt); color: var(--red); }
+
+    .metric-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+    .metric-badge.red { background: var(--red-lt); color: var(--red); }
+    .metric-badge.green { background: var(--green-lt); color: var(--green); }
+
+    .metric-body label {
+      font-size: 12px;
+      color: var(--text-light);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .metric-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .metric-value.mono { font-family: var(--mono); letter-spacing: -0.5px; }
+
+    /* ─── Products Grid ─── */
+    .products-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .link-see-all {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .product-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      background: var(--bg); /* Menyesuaikan list item di kanan file asli */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.15s;
+    }
+    .product-card:hover { transform: translateY(-2px); }
+    .product-img-placeholder {
+      height: 100px;
+      background: var(--surface);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .product-img-placeholder img {
+      width: 50px; height: 50px; object-fit: contain; opacity: 0.8;
+    }
+    .product-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .product-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .product-price {
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 13px;
+    }
+
+    /* ─── Quick Actions (Right Column) ─── */
+    .actions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .action-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .action-item:hover {
+      background: var(--primary-lt);
+      border-color: var(--primary);
+    }
+    .action-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Warna untuk Quick Actions Icons */
+    .action-icon.blue { background: var(--primary-lt); color: var(--primary); }
+    .action-icon.green { background: var(--green-lt); color: var(--green); }
+    .action-icon.purple { background: var(--purple-lt); color: var(--purple); }
+    .action-icon.orange { background: var(--accent-lt); color: var(--accent); }
+
+    .metric-icon.cart, 
+    .metric-icon.transit, 
+    .metric-icon.credit, 
+    .metric-icon.outstanding { background: var(--primary-lt); color: var(--primary); }
+    .action-info { flex: 1; min-width: 0; }
+    .action-title { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+    .action-desc { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+
+    /* Responsive tweak */
+    @media (max-width: 1024px) {
+      .content { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR (CUSTOMER PORTAL) ══════════ -->
+<aside class="sidebar">
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <!-- Navigation (Menyesuaikan menu Customer dari .png) -->
+  <nav class="sidebar-nav">
+    <a class="nav-item active" href="customer_dashboard.html">
+      <img src="assets/dashboard.svg" class="nav-icon" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item" href="catalog.html">
+      <img src="assets/katalog.svg" class="nav-icon" width="20" height="20"> Browse Catalog
+    </a>
+    <a class="nav-item" href="cart.html">
+      <img src="assets/purchase.svg" class="nav-icon" width="20" height="20"> My Cart
+    </a>
+    <a class="nav-item" href="my-orders.html">
+      <img src="assets/order.svg" class="nav-icon" width="20" height="20"> My Orders
+    </a>
+    <a class="nav-item" href="invoices.html">
+      <img src="assets/invoices.svg" class="nav-icon" width="20" height="20"> Invoices &amp; Credit
+    </a>
+  </nav>
+
+  <!-- Footer nav -->
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" class="nav-icon" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" class="nav-icon" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN CONTENT ══════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Cari produk populer, kategori, atau nomor pesanan...">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- User Profile Widget -->
+      <div class="profile-widget">
+        <div class="avatar-wrapper">B</div>
+        <div class="user-info-header">
+          <span class="name">Budi Santoso</span>
+          <span class="email">budi@sejahtera.co.id</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Layout Grid -->
+  <main class="content">
+
+    <!-- ── LEFT COLUMN (Utama) ── -->
+    <div class="left-col">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h1>Selamat datang, Budi Santoso</h1>
+          <p>Belanja kebutuhan bisnis Anda dengan mudah dari PT Mitra Distribusi</p>
+        </div>
+        <button class="btn-primary" onclick="goToCatalog()">
+          Mulai Belanja <img src="assets/katalog.svg" width="14" height="14" style="filter: invert(36%) sepia(85%) saturate(1214%) hue-rotate(224deg);">
+        </button>
+      </div>
+
+      <!-- Customer Metrics Grid (Mengambil data dari .png) -->
+      <div class="metrics-grid">
+        
+        <!-- Items in Cart -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon cart">
+              <img src="assets/purchase.svg" width="20" height="20">
+            </div>
+            <span class="metric-badge red">Cart kosong</span>
+          </div>
+          <div class="metric-body">
+            <label>Items in Cart</label>
+            <span class="metric-value">0</span>
+          </div>
+        </div>
+
+        <!-- Active Orders -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon transit">
+              <img src="assets/order.svg" width="20" height="20">
+            </div>
+            <span class="metric-badge green">2 in transit</span>
+          </div>
+          <div class="metric-body">
+            <label>Active Orders</label>
+            <span class="metric-value">3</span>
+          </div>
+        </div>
+
+        <!-- Credit Available -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon credit">
+              <img src="assets/Credit.svg" width="20" height="20">
+            </div>
+            <span class="metric-badge green">98% tersedia</span>
+          </div>
+          <div class="metric-body">
+            <label>Credit Available</label>
+            <span class="metric-value mono">Rp 491M</span>
+          </div>
+        </div>
+
+        <!-- Outstanding -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon outstanding">
+              <img src="assets/Out.svg" width="20" height="20">
+            </div>
+            <span class="metric-badge red">2 invoice due</span>
+          </div>
+          <div class="metric-body">
+            <label>Outstanding</label>
+            <span class="metric-value mono">Rp 9.1M</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Produk Populer Grid -->
+      <div class="card">
+        <div class="products-header">
+          <div>
+            <span class="card-title" style="margin-bottom: 4px; display: block;">Produk Populer</span>
+            <span class="card-subtitle" style="margin: 0;">Rekomendasi untuk Anda</span>
+          </div>
+          <a class="link-see-all" href="catalog.html">Lihat Semua →</a>
+        </div>
+        
+        <div class="products-grid">
+          <!-- Produk 1 -->
+          <div class="product-card">
+            <div class="product-img-placeholder">
+              <!-- Ganti dengan tag img jika ada aset -->
+              <span style="font-size: 24px;">🌾</span>
+            </div>
+            <div class="product-info">
+              <span class="product-name">Beras Premium</span>
+              <span class="product-price">Rp 75.000</span>
+            </div>
+          </div>
+
+          <!-- Produk 2 -->
+          <div class="product-card">
+            <div class="product-img-placeholder">
+              <span style="font-size: 24px;">🌾</span>
+            </div>
+            <div class="product-info">
+              <span class="product-name">Beras Medium</span>
+              <span class="product-price">Rp 320.000</span>
+            </div>
+          </div>
+
+          <!-- Produk 3 -->
+          <div class="product-card">
+            <div class="product-img-placeholder">
+              <span style="font-size: 24px;">🛢️</span>
+            </div>
+            <div class="product-info">
+              <span class="product-name">Minyak Goreng 1L</span>
+              <span class="product-price">Rp 38.000</span>
+            </div>
+          </div>
+
+          <!-- Produk 4 -->
+          <div class="product-card">
+            <div class="product-img-placeholder">
+              <span style="font-size: 24px;">🛢️</span>
+            </div>
+            <div class="product-info">
+              <span class="product-name">Minyak Goreng Bulk</span>
+              <span class="product-price">Rp 92.000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left-col -->
+
+    <!-- ── RIGHT COLUMN (Sidebar Ringkasan / Aksi) ── -->
+    <div class="right-col">
+
+      <!-- Quick Actions dengan 4 Menu Request -->
+      <div class="card">
+        <div class="card-title">Quick Actions</div>
+        <div class="actions-list">
+          
+          <!-- Action 1: Browse Katalog -->
+          <a href="catalog.html" class="action-item">
+            <div class="action-icon blue">
+              <img src="assets/katalog.svg" width="18" height="18">
+            </div>
+            <div class="action-info">
+              <div class="action-title">Browse Katalog</div>
+              <div class="action-desc">Cari produk yang Anda butuhkan</div>
+            </div>
+          </a>
+
+          <!-- Action 2: Lihat Keranjang -->
+          <a href="cart.html" class="action-item">
+            <div class="action-icon green">
+              <img src="assets/purchase.svg" width="18" height="18">
+            </div>
+            <div class="action-info">
+              <div class="action-title">Lihat Keranjang</div>
+              <div class="action-desc">0 item siap checkout</div>
+            </div>
+          </a>
+
+          <!-- Action 3: Lacak Pesanan -->
+          <a href="my-orders.html" class="action-item">
+            <div class="action-icon purple">
+              <img src="assets/order.svg" width="18" height="18">
+            </div>
+            <div class="action-info">
+              <div class="action-title">Lacak Pesanan</div>
+              <div class="action-desc">Cek status pengiriman</div>
+            </div>
+          </a>
+
+          <!-- Action 4: Bayar Tagihan -->
+          <a href="invoices.html" class="action-item">
+            <div class="action-icon orange">
+              <img src="assets/invoices.svg" width="18" height="18">
+            </div>
+            <div class="action-info">
+              <div class="action-title">Bayar Tagihan</div>
+              <div class="action-desc">Kelola invoice & Credit</div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+    </div><!-- /right-col -->
+
+  </main>
+</div><!-- /main -->
+
+<script>
+    // Fungsi untuk navigasi
+    function goToCatalog() {
+        window.location.href = 'catalog.html';
+    }
+</script>
+
+</body>
+</html>

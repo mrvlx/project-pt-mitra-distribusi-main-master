@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi - Warehouse</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:    #1a4fba;
+      --accent:     #f5a623;
+      --accent-lt:  #fff8ec;
+      --danger:     #e53935;
+      --success:    #2e7d32;
+      --success-lt: #e8f5e9;
+      --warn:       #f57c00;
+      --warn-lt:    #fff3e0;
+      --info:       #0277bd;
+      --info-lt:    #e1f0fb;
+      --bg:         #f4f6fa;
+      --surface:    #ffffff;
+      --card-bg:    #ffffff;
+      --border:     #e2e8f0;
+      --text:       #1e293b;
+      --muted:      #64748b;
+      --light:      #94a3b8;
+      --radius:     14px;
+      --sidebar-w:  220px;
+      --header-h:   64px;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,.07);
+      --shadow-md:  0 4px 16px rgba(0,0,0,.09);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+
+    /* Logo placeholder */
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .logo-text span:first-child {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--light);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .logo-text span:last-child {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--muted); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text); }
+    .nav-item.active {
+      background: #eef3fc;
+      color: var(--primary);
+    }
+
+    .nav-icon {
+      width:20px; height:20px; border-radius:5px;
+      flex-shrink:0;
+    }
+    .nav-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .nav-item.active .nav-icon { opacity:1; background: var(--primary); }
+
+    .sidebar-footer {
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* ── Header ── */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--light);
+    }
+    .search-icon { width:16px; height:16px; border-radius:50%; flex-shrink:0; }
+    .search-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size:13px; width:100%; }
+    .search-bar input::placeholder { color: var(--light); }
+
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .bell-icon { width:16px; height:16px; border-radius:4px; }
+    .bell-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .notif-dot { width:8px; height:8px; background: var(--danger); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+
+    .avatar {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; overflow: hidden;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Content ── */
+    .page-content {
+      padding: 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── PAGE HEADER ─────────────────────────────────── */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-title { font-size: 22px; font-weight: 700; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px; border-radius: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .87; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,79,186,.22); }
+    .btn-outline  { background: #fff; color: var(--text); border: 1px solid var(--border); }
+
+    /* ── SUMMARY STRIP ───────────────────────────────── */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+    .summary-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .sc-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .sc-icon svg { width: 20px; height: 20px; }
+    .ic-blue   { background: var(--info-lt);    color: var(--info); }
+    .ic-orange { background: var(--warn-lt);    color: var(--warn); }
+    .ic-green  { background: var(--success-lt); color: var(--success); }
+    .ic-red    { background: #fdecea;           color: var(--danger); }
+    .sc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 6px; }
+    .sc-value { font-size: 22px; font-weight: 700; margin-bottom: 3px; }
+    .sc-value.blue   { color: var(--primary); }
+    .sc-value.orange { color: var(--warn); }
+    .sc-value.green  { color: var(--success); }
+    .sc-sub { font-size: 12px; color: var(--muted); }
+
+    /* ── FILTER BAR ──────────────────────────────────── */
+    .filter-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
+    }
+    .filter-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .view-tabs { display: flex; gap: 4px; background: var(--bg); border-radius: 8px; padding: 3px; }
+    .view-tab {
+      padding: 5px 12px; border-radius: 6px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      color: var(--muted); transition: all .15s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .view-tab svg { width: 14px; height: 14px; }
+    .view-tab.active { background: #fff; color: var(--primary); box-shadow: var(--shadow-sm); }
+    .filter-sep { width: 1px; height: 24px; background: var(--border); }
+    .filter-select {
+      padding: 7px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 13px; color: var(--text);
+      background: var(--bg); outline: none; cursor: pointer;
+    }
+    .filter-right { margin-left: auto; }
+
+    /* ── WAREHOUSE GRID ──────────────────────────────── */
+    .warehouse-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    /* ── WAREHOUSE CARD ──────────────────────────────── */
+    .wh-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .wh-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+    .wh-card-header {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .wh-title-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .wh-name { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .wh-meta { display: flex; flex-direction: column; gap: 4px; }
+    .wh-meta-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--muted);
+    }
+    .wh-meta-item svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--light); }
+
+    .wh-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .wh-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; }
+    .badge-active   { background: var(--success-lt); color: var(--success); }
+    .badge-inactive { background: #f1f5f9;           color: var(--muted); }
+    .badge-full     { background: #fdecea;           color: var(--danger); }
+
+    /* ── STATS ROW ───────────────────────────────────── */
+    .wh-stats {
+      padding: 16px 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 4px; }
+    .stat-value { font-size: 20px; font-weight: 700; }
+    .stat-value.blue { color: var(--primary); }
+    .stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── CAPACITY SECTION ────────────────────────────── */
+    .wh-capacity {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cap-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cap-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .cap-pct {
+      font-size: 14px; font-weight: 700;
+    }
+    .cap-pct.low    { color: var(--success); }
+    .cap-pct.mid    { color: var(--accent); }
+    .cap-pct.high   { color: var(--warn); }
+    .cap-pct.danger { color: var(--danger); }
+
+    .cap-bar {
+      width: 100%; height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .cap-fill {
+      height: 100%; border-radius: 4px;
+      transition: width .4s ease;
+    }
+    .fill-low    { background: var(--success); }
+    .fill-mid    { background: var(--accent); }
+    .fill-high   { background: var(--warn); }
+    .fill-danger { background: var(--danger); }
+
+    .cap-footer {
+      display: flex; justify-content: space-between;
+    }
+    .cap-stat { text-align: center; }
+    .cap-stat-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+    .cap-stat-value { font-size: 13px; font-weight: 600; }
+    .cap-stat-value.green { color: var(--success); }
+
+    /* ── CATEGORY MINI BARS ──────────────────────────── */
+    .wh-categories {
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 10px; }
+    .cat-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 7px;
+    }
+    .cat-row:last-child { margin-bottom: 0; }
+    .cat-name { font-size: 12px; color: var(--text); width: 90px; flex-shrink: 0; }
+    .cat-bar { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .cat-fill { height: 100%; border-radius: 3px; background: var(--primary); }
+    .cat-val { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; min-width: 50px; text-align: right; }
+
+    /* ── CARD FOOTER ─────────────────────────────────── */
+    .wh-card-footer {
+      padding: 14px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px;
+    }
+    .wh-actions { display: flex; gap: 8px; }
+    .act-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 7px;
+      font-family: inherit; font-size: 12px; font-weight: 600;
+      cursor: pointer; border: none; transition: opacity .15s;
+    }
+    .act-btn svg { width: 13px; height: 13px; }
+    .act-btn:hover { opacity: .85; }
+    .act-btn-primary { background: var(--primary); color: #fff; }
+    .act-btn-outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+    .act-btn-ghost   { background: var(--bg);  color: var(--muted); border: 1px solid var(--border); }
+
+    .last-updated { font-size: 11px; color: var(--light); }
+
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ─────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html">
+      <img src="assets/dashboard.svg" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item" href="inventory.html">
+      <img src="assets/inventory.svg" width="20" height="20"> Inventory
+    </a>
+    <a class="nav-item" href="reports.html">
+      <img src="assets/report.svg" width="20" height="20"> Reports
+    </a>
+    <a class="nav-item" href="suppliers.html">
+      <img src="assets/supplier.svg" width="20" height="20"> Suppliers
+    </a>
+    <a class="nav-item" href="orders.html">
+      <img src="assets/order.svg" width="20" height="20"> Orders
+    </a>
+    <a class="nav-item" href="warehouse.html">
+      <img src="assets/Warehouse.svg" width="20" height="20"> Warehouse
+    </a>
+    <a class="nav-item" href="purchase.html">
+      <img src="assets/purchase.svg" width="20" height="20"> Purchase Orders
+    </a>
+    <a class="nav-item" href="customers.html">
+      <img src="assets/customer.svg" width="20" height="20"> Customers
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="#">
+      <img src="assets/setting.svg" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- Avatar user -->
+      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="page-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Warehouse</h1>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah Gudang
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Strip -->
+    <div class="summary-strip">
+      <div class="summary-card">
+        <div class="sc-icon ic-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        </div>
+        <div class="sc-label">Total Gudang</div>
+        <div class="sc-value blue">4</div>
+        <div class="sc-sub">2 aktif · 2 lokasi</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-icon ic-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="sc-label">Total Stock Value</div>
+        <div class="sc-value blue">Rp 7.14B</div>
+        <div class="sc-sub">Semua gudang</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-icon ic-orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="sc-label">Total Kapasitas</div>
+        <div class="sc-value orange">18.000 m³</div>
+        <div class="sc-sub">Gabungan semua gudang</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-icon ic-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="sc-label">Total Tersedia</div>
+        <div class="sc-value green">4.950 m³</div>
+        <div class="sc-sub">Siap diisi</div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Tampilan:</span>
+      <div class="view-tabs">
+        <div class="view-tab active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Grid
+        </div>
+        <div class="view-tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          List
+        </div>
+      </div>
+      <div class="filter-sep"></div>
+      <select class="filter-select">
+        <option>Semua Status</option>
+        <option>Aktif</option>
+        <option>Tidak Aktif</option>
+      </select>
+      <select class="filter-select">
+        <option>Semua Kota</option>
+        <option>Jakarta</option>
+        <option>Surabaya</option>
+      </select>
+      <div class="filter-right">
+        <button class="btn btn-outline" style="padding:7px 14px;font-size:13px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter
+        </button>
+      </div>
+    </div>
+
+    <!-- ── WAREHOUSE CARDS GRID ──────────────────────── -->
+    <div class="warehouse-grid">
+
+      <!-- ── CARD 1: Jakarta Central ─────────────────── -->
+      <div class="wh-card">
+        <div class="wh-card-header">
+          <div class="wh-title-row">
+            <div>
+              <div class="wh-name">Jakarta Central</div>
+            </div>
+            <span class="wh-badge badge-active">Aktif</span>
+          </div>
+          <div class="wh-meta">
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Jl. Sudirman No. 45, Jakarta Pusat
+            </div>
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Manager: <strong style="color:var(--text);margin-left:4px;">Budi Santoso</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-stats">
+          <div class="stat-item">
+            <div class="stat-label">Stock Value</div>
+            <div class="stat-value blue">Rp 4.25B</div>
+            <div class="stat-sub">Nilai stok aktif</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Products</div>
+            <div class="stat-value">1.450</div>
+            <div class="stat-sub">items terdaftar</div>
+          </div>
+        </div>
+
+        <div class="wh-capacity">
+          <div class="cap-header">
+            <span class="cap-title">Capacity Utilization</span>
+            <span class="cap-pct high">78.5%</span>
+          </div>
+          <div class="cap-bar">
+            <div class="cap-fill fill-high" style="width:78.5%"></div>
+          </div>
+          <div class="cap-footer">
+            <div class="cap-stat">
+              <div class="cap-stat-label">Total</div>
+              <div class="cap-stat-value">10.000 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Used</div>
+              <div class="cap-stat-value">7.850 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Available</div>
+              <div class="cap-stat-value green">2.150 m³</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-categories">
+          <div class="cat-title">Distribusi Kategori</div>
+          <div class="cat-row">
+            <span class="cat-name">Elektronik</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:72%"></div></div>
+            <span class="cat-val">580 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Peralatan</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:50%"></div></div>
+            <span class="cat-val">420 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Spare Part</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:35%"></div></div>
+            <span class="cat-val">290 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Lainnya</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:20%"></div></div>
+            <span class="cat-val">160 item</span>
+          </div>
+        </div>
+
+        <div class="wh-card-footer">
+          <div class="wh-actions">
+            <button class="act-btn act-btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Detail
+            </button>
+            <button class="act-btn act-btn-outline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="act-btn act-btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Laporan
+            </button>
+          </div>
+          <span class="last-updated">Update: 14 Mei 2026</span>
+        </div>
+      </div>
+
+      <!-- ── CARD 2: Surabaya Branch ─────────────────── -->
+      <div class="wh-card">
+        <div class="wh-card-header">
+          <div class="wh-title-row">
+            <div>
+              <div class="wh-name">Surabaya Branch</div>
+            </div>
+            <span class="wh-badge badge-active">Aktif</span>
+          </div>
+          <div class="wh-meta">
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Jl. Ahmad Yani No. 123, Surabaya
+            </div>
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Manager: <strong style="color:var(--text);margin-left:4px;">Siti Rahayu</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-stats">
+          <div class="stat-item">
+            <div class="stat-label">Stock Value</div>
+            <div class="stat-value blue">Rp 2.89B</div>
+            <div class="stat-sub">Nilai stok aktif</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Products</div>
+            <div class="stat-value">980</div>
+            <div class="stat-sub">items terdaftar</div>
+          </div>
+        </div>
+
+        <div class="wh-capacity">
+          <div class="cap-header">
+            <span class="cap-title">Capacity Utilization</span>
+            <span class="cap-pct mid">65.0%</span>
+          </div>
+          <div class="cap-bar">
+            <div class="cap-fill fill-mid" style="width:65%"></div>
+          </div>
+          <div class="cap-footer">
+            <div class="cap-stat">
+              <div class="cap-stat-label">Total</div>
+              <div class="cap-stat-value">8.000 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Used</div>
+              <div class="cap-stat-value">5.200 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Available</div>
+              <div class="cap-stat-value green">2.800 m³</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-categories">
+          <div class="cat-title">Distribusi Kategori</div>
+          <div class="cat-row">
+            <span class="cat-name">Elektronik</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:55%"></div></div>
+            <span class="cat-val">380 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Peralatan</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:40%"></div></div>
+            <span class="cat-val">290 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Spare Part</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:30%"></div></div>
+            <span class="cat-val">200 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Lainnya</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:15%"></div></div>
+            <span class="cat-val">110 item</span>
+          </div>
+        </div>
+
+        <div class="wh-card-footer">
+          <div class="wh-actions">
+            <button class="act-btn act-btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Detail
+            </button>
+            <button class="act-btn act-btn-outline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="act-btn act-btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Laporan
+            </button>
+          </div>
+          <span class="last-updated">Update: 14 Mei 2026</span>
+        </div>
+      </div>
+
+      <!-- ── CARD 3: Bandung Depot ───────────────────── -->
+      <div class="wh-card">
+        <div class="wh-card-header">
+          <div class="wh-title-row">
+            <div>
+              <div class="wh-name">Bandung Depot</div>
+            </div>
+            <span class="wh-badge badge-active">Aktif</span>
+          </div>
+          <div class="wh-meta">
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Jl. Asia Afrika No. 8, Bandung
+            </div>
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Manager: <strong style="color:var(--text);margin-left:4px;">Eko Prasetyo</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-stats">
+          <div class="stat-item">
+            <div class="stat-label">Stock Value</div>
+            <div class="stat-value blue">Rp 1.12B</div>
+            <div class="stat-sub">Nilai stok aktif</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Products</div>
+            <div class="stat-value">540</div>
+            <div class="stat-sub">items terdaftar</div>
+          </div>
+        </div>
+
+        <div class="wh-capacity">
+          <div class="cap-header">
+            <span class="cap-title">Capacity Utilization</span>
+            <span class="cap-pct danger">91.0%</span>
+          </div>
+          <div class="cap-bar">
+            <div class="cap-fill fill-danger" style="width:91%"></div>
+          </div>
+          <div class="cap-footer">
+            <div class="cap-stat">
+              <div class="cap-stat-label">Total</div>
+              <div class="cap-stat-value">5.000 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Used</div>
+              <div class="cap-stat-value">4.550 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Available</div>
+              <div class="cap-stat-value green">450 m³</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-categories">
+          <div class="cat-title">Distribusi Kategori</div>
+          <div class="cat-row">
+            <span class="cat-name">Elektronik</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:60%"></div></div>
+            <span class="cat-val">210 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Peralatan</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:45%"></div></div>
+            <span class="cat-val">180 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Spare Part</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:25%"></div></div>
+            <span class="cat-val">100 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Lainnya</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:13%"></div></div>
+            <span class="cat-val">50 item</span>
+          </div>
+        </div>
+
+        <div class="wh-card-footer">
+          <div class="wh-actions">
+            <button class="act-btn act-btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Detail
+            </button>
+            <button class="act-btn act-btn-outline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="act-btn act-btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Laporan
+            </button>
+          </div>
+          <span class="last-updated">Update: 13 Mei 2026</span>
+        </div>
+      </div>
+
+      <!-- ── CARD 4: Semarang Hub (Inactive) ────────── -->
+      <div class="wh-card" style="opacity:.75;">
+        <div class="wh-card-header">
+          <div class="wh-title-row">
+            <div>
+              <div class="wh-name">Semarang Hub</div>
+            </div>
+            <span class="wh-badge badge-inactive">Tidak Aktif</span>
+          </div>
+          <div class="wh-meta">
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Jl. Pemuda No. 22, Semarang
+            </div>
+            <div class="wh-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Manager: <strong style="color:var(--text);margin-left:4px;">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-stats">
+          <div class="stat-item">
+            <div class="stat-label">Stock Value</div>
+            <div class="stat-value blue">Rp 0</div>
+            <div class="stat-sub">Belum beroperasi</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Products</div>
+            <div class="stat-value">0</div>
+            <div class="stat-sub">items terdaftar</div>
+          </div>
+        </div>
+
+        <div class="wh-capacity">
+          <div class="cap-header">
+            <span class="cap-title">Capacity Utilization</span>
+            <span class="cap-pct low">0%</span>
+          </div>
+          <div class="cap-bar">
+            <div class="cap-fill fill-low" style="width:0%"></div>
+          </div>
+          <div class="cap-footer">
+            <div class="cap-stat">
+              <div class="cap-stat-label">Total</div>
+              <div class="cap-stat-value">6.000 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Used</div>
+              <div class="cap-stat-value">0 m³</div>
+            </div>
+            <div class="cap-stat">
+              <div class="cap-stat-label">Available</div>
+              <div class="cap-stat-value green">6.000 m³</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wh-categories">
+          <div class="cat-title">Distribusi Kategori</div>
+          <div class="cat-row">
+            <span class="cat-name">Elektronik</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:0%"></div></div>
+            <span class="cat-val">0 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Peralatan</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:0%"></div></div>
+            <span class="cat-val">0 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Spare Part</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:0%"></div></div>
+            <span class="cat-val">0 item</span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-name">Lainnya</span>
+            <div class="cat-bar"><div class="cat-fill" style="width:0%"></div></div>
+            <span class="cat-val">0 item</span>
+          </div>
+        </div>
+
+        <div class="wh-card-footer">
+          <div class="wh-actions">
+            <button class="act-btn act-btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Detail
+            </button>
+            <button class="act-btn act-btn-outline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="act-btn act-btn-outline" style="color:var(--success);border-color:var(--success);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 12 10 17 19 8"/></svg>
+              Aktifkan
+            </button>
+          </div>
+          <span class="last-updated">Belum beroperasi</span>
+        </div>
+      </div>
+
+    </div><!-- /warehouse-grid -->
+  </main>
+</div><!-- /main -->
+
+</body>
+</html>

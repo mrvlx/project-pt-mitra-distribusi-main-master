@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi — Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --thead-bg:  #F0F2F8;
+      --primary:   #2B5EE8;
+      --primary-lt:#EEF2FD;
+      --green:     #22C55E;
+      --green-lt:  #DCFCE7;
+      --amber:     #F59E0B;
+      --amber-lt:  #FEF3C7;
+      --red:       #EF4444;
+      --red-lt:    #FEE2E2;
+      --purple:    #9B6EE8;
+      --purple-lt: #F2EDFD;
+      --grey-lt:   #F1F3F8;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; font-size: 14px; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar-w); 
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; 
+      flex-direction: column;
+      position: fixed; 
+      top: 0; left: 0; 
+      height: 100vh;
+      z-index: 100; 
+      padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      padding: 20px 20px 16px; 
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child { font-size: 10px; font-weight: 500; color: var(--text-light); letter-spacing: .04em; text-transform: uppercase; }
+    .logo-text span:last-child  { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; color: var(--text-mid); font-weight: 500;
+      font-size: 13.5px; text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover  { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); }
+    .nav-icon {
+      width: 20px; height: 20px; border-radius: 5px;
+      background: currentColor; opacity: .18; flex-shrink: 0;
+      /* ASET: ganti dengan <img src="icon-xxx.svg" width="20" height="20"> */
+    }
+    .nav-item.active .nav-icon { opacity: 1; background: var(--primary); }
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ══ HEADER ══ */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 28px; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .search-bar {
+      flex: 1; max-width: 400px; display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 100px; padding: 8px 16px; color: var(--text-light); font-size: 13px;
+    }
+    .search-icon { width: 16px; height: 16px; background: var(--text-light); border-radius: 50%; flex-shrink: 0;
+      /* ASET: ganti dengan <img src="icon-search.svg"> */ }
+    .search-bar input { border: none; background: transparent; outline: none; color: var(--text-dark); font-family: var(--font); font-size: 13px; width: 100%; }
+    .search-bar input::placeholder { color: var(--text-light); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .notif-btn {
+      width: 36px; height: 36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
+    }
+    .bell-icon { width: 16px; height: 16px; background: var(--text-mid); border-radius: 4px;
+      /* ASET: ganti dengan <img src="icon-bell.svg"> */ }
+    .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; overflow: hidden;
+      /* ASET: ganti dengan <img src="avatar.jpg" width="36" height="36"> */
+    }
+
+    /* ══ CONTENT ══ */
+    .content { padding: 28px; display: flex; flex-direction: column; gap: 24px; }
+
+    /* ══ CARD ══ */
+    .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 24px; }
+
+    /* ══ OVERALL ORDERS ══ */
+    .overall-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    }
+    .ov-col {
+      padding: 8px 28px 8px 0;
+      border-right: 1px solid var(--border);
+      margin-right: 28px;
+    }
+    .ov-col:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+
+    .ov-label { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+    .ov-label.blue   { color: var(--primary); }
+    .ov-label.amber  { color: var(--amber); }
+    .ov-label.purple { color: var(--purple); }
+    .ov-label.red    { color: var(--red); }
+
+    .ov-val  { font-size: 24px; font-weight: 800; font-family: var(--mono); color: var(--text-dark); margin-bottom: 6px; }
+    .ov-desc { font-size: 12px; color: var(--text-light); font-weight: 500; }
+
+    /* ══ ORDERS TABLE SECTION ══ */
+    .table-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+
+    .table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 16px;
+    }
+    .table-title { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+
+    .btn-primary {
+      display: flex; align-items: center; gap: 7px;
+      padding: 10px 18px; background: var(--primary); color: #fff;
+      border: none; border-radius: var(--radius-sm); font-family: var(--font);
+      font-size: 13.5px; font-weight: 700; cursor: pointer; transition: background .15s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: #1F4DC5; }
+
+    /* ══ TABLE ══ */
+    table { width: 100%; border-collapse: collapse; }
+
+    /* thead — abu-abu keputihan agar bisa dibedakan dari tbody */
+    thead tr { background: var(--thead-bg); border-top: 1px solid var(--border); border-bottom: 2px solid var(--border); }
+    thead th {
+      text-align: left; font-size: 12px; font-weight: 700;
+      color: var(--text-mid); padding: 13px 16px;
+      letter-spacing: .04em; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    thead th:first-child { padding-left: 24px; }
+    thead th:last-child  { padding-right: 24px; }
+
+    /* tbody */
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #FAFBFE; }
+
+    tbody td {
+      padding: 15px 16px; vertical-align: middle;
+      font-size: 13.5px; color: var(--text-dark);
+    }
+    tbody td:first-child { padding-left: 24px; }
+    tbody td:last-child  { padding-right: 24px; }
+
+    /* ── Cell styles ── */
+    .td-product { font-weight: 600; }
+    .td-amount  { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text-dark); }
+    .td-qty     { font-family: var(--mono); font-size: 13px; color: var(--text-mid); }
+    .td-soid    { font-family: var(--mono); font-size: 13px; color: var(--text-mid); font-weight: 500; }
+    .td-date    { font-family: var(--mono); font-size: 12.5px; color: var(--text-light); }
+
+    /* ── Status badges ── */
+    .badge {
+      display: inline-block; padding: 4px 12px;
+      border-radius: 6px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid; white-space: nowrap;
+    }
+    /* Order status */
+    .badge-confirmed  { background: var(--primary-lt); color: var(--primary); border-color: #c5d4f8; }
+    .badge-processing { background: var(--amber-lt);   color: var(--amber);   border-color: #fde68a; }
+    .badge-draft      { background: var(--grey-lt);    color: var(--text-mid);border-color: var(--border); }
+    .badge-completed  { background: var(--green-lt);   color: var(--green);   border-color: #bbf7d0; }
+    .badge-cancelled  { background: var(--red-lt);     color: var(--red);     border-color: #fecaca; }
+
+    /* Payment status — no border, just text color */
+    .pay-paid     { font-size: 13px; font-weight: 700; color: var(--green); }
+    .pay-unpaid   { font-size: 13px; font-weight: 700; color: var(--red); }
+    .pay-returned { font-size: 13px; font-weight: 600; color: var(--text-mid); }
+    .pay-delivery { font-size: 13px; font-weight: 700; color: var(--green); }
+    .pay-delayed  { font-size: 13px; font-weight: 700; color: var(--amber); }
+
+    /* ══ PAGINATION ══ */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-top: 1px solid var(--border);
+    }
+    .pagination-info { font-size: 13px; color: var(--text-light); font-family: var(--mono); }
+    .btn-page {
+      padding: 8px 18px; background: var(--surface); color: var(--text-mid);
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-page:hover   { background: var(--bg); border-color: #c5cbda; }
+    .btn-page:disabled { opacity: .4; cursor: not-allowed; }
+
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main    { margin-left: 0; }
+      .overall-grid { grid-template-columns: repeat(2,1fr); gap: 16px; }
+      .ov-col  { border-right: none; margin-right: 0; padding-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+      .table-card { overflow-x: auto; }
+      table { min-width: 800px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html">
+      <img src="assets/dashboard.svg" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item" href="inventory.html">
+      <img src="assets/inventory.svg" width="20" height="20"> Inventory
+    </a>
+    <a class="nav-item" href="reports.html">
+      <img src="assets/report.svg" width="20" height="20"> Reports
+    </a>
+    <a class="nav-item" href="suppliers.html">
+      <img src="assets/supplier.svg" width="20" height="20"> Suppliers
+    </a>
+    <a class="nav-item active" href="orders.html">
+      <img src="assets/order.svg" width="20" height="20"> Orders
+    </a>
+    <a class="nav-item" href="warehouse.html">
+      <img src="assets/Warehouse.svg" width="20" height="20"> Warehouse
+    </a>
+    <a class="nav-item" href="purchase.html">
+      <img src="assets/purchase.svg" width="20" height="20"> Purchase Orders
+    </a>
+    <a class="nav-item" href="customers.html">
+      <img src="assets/customer.svg" width="20" height="20"> Customers
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Header -->
+<header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- Avatar user -->
+      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- ── Overall Orders ── -->
+    <div class="card">
+      <div style="font-size:16px;font-weight:800;color:var(--text-dark);margin-bottom:20px;">Overall Orders</div>
+      <div class="overall-grid">
+
+        <div class="ov-col">
+          <div class="ov-label blue">Total Orders</div>
+          <div class="ov-val">37</div>
+          <div class="ov-desc">Last 7 days</div>
+        </div>
+
+        <div class="ov-col">
+          <div class="ov-label amber">Total Revenue</div>
+          <div class="ov-val">Rp25000</div>
+          <div class="ov-desc">Revenue</div>
+        </div>
+
+        <div class="ov-col">
+          <div class="ov-label purple">Total Returned</div>
+          <div class="ov-val">5</div>
+          <div class="ov-desc">Last 7 days</div>
+        </div>
+
+        <div class="ov-col">
+          <div class="ov-label red">On the way</div>
+          <div class="ov-val">12</div>
+          <div class="ov-desc">Ordered</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Orders Table ── -->
+    <div class="table-card">
+
+      <!-- Table header bar -->
+      <div class="table-header">
+        <span class="table-title">Orders</span>
+        <button class="btn-primary" onclick="window.location.href='add-SO.html'">+ Add Sales Order</button>
+      </div>
+
+      <table>
+        <!-- thead dengan background abu-abu keputihan (--thead-bg: #F0F2F8) -->
+        <thead>
+          <tr>
+            <th>Products</th>
+            <th>Total Amount</th>
+            <th>Quantity</th>
+            <th>SO ID</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Payment Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <!-- Row 1 — Maggi -->
+          <tr>
+            <td class="td-product">Maggi</td>
+            <td class="td-amount">Rp4306</td>
+            <td class="td-qty">43 Packets</td>
+            <td class="td-soid">7535</td>
+            <td class="td-date">11/12/22</td>
+            <td><span class="badge badge-confirmed">Confirmed</span></td>
+            <td><span class="pay-paid">Paid</span></td>
+          </tr>
+
+          <!-- Row 2 — Bru -->
+          <tr>
+            <td class="td-product">Bru</td>
+            <td class="td-amount">Rp2557</td>
+            <td class="td-qty">22 Packets</td>
+            <td class="td-soid">5724</td>
+            <td class="td-date">21/12/22</td>
+            <td><span class="badge badge-processing">Processing</span></td>
+            <td><span class="pay-unpaid">Unpaid</span></td>
+          </tr>
+
+          <!-- Row 3 — Red Bull -->
+          <tr>
+            <td class="td-product">Red Bull</td>
+            <td class="td-amount">Rp4075</td>
+            <td class="td-qty">36 Packets</td>
+            <td class="td-soid">2775</td>
+            <td class="td-date">5/12/22</td>
+            <td><span class="badge badge-draft">Draft</span></td>
+            <td><span class="pay-unpaid">Unpaid</span></td>
+          </tr>
+
+          <!-- Row 4 — Bourn Vita -->
+          <tr>
+            <td class="td-product">Bourn Vita</td>
+            <td class="td-amount">Rp5052</td>
+            <td class="td-qty">14 Packets</td>
+            <td class="td-soid">2275</td>
+            <td class="td-date">8/12/22</td>
+            <td><span class="badge badge-completed">Completed</span></td>
+            <td><span class="pay-paid">Paid</span></td>
+          </tr>
+
+          <!-- Row 5 — Horlicks -->
+          <tr>
+            <td class="td-product">Horlicks</td>
+            <td class="td-amount">Rp5370</td>
+            <td class="td-qty">5 Packets</td>
+            <td class="td-soid">2427</td>
+            <td class="td-date">9/1/23</td>
+            <td><span class="badge badge-cancelled">Cancelled</span></td>
+            <td><span class="pay-delayed">Partial</span></td>
+          </tr>
+
+          <!-- Row 6 — Harpic -->
+          <tr>
+            <td class="td-product">Harpic</td>
+            <td class="td-amount">Rp6065</td>
+            <td class="td-qty">10 Packets</td>
+            <td class="td-soid">2578</td>
+            <td class="td-date">9/1/23</td>
+            <td><span class="badge badge-confirmed">Confirmed</span></td>
+            <td><span class="pay-delayed">Partial</span></td>
+          </tr>
+
+          <!-- Row 7 — Ariel -->
+          <tr>
+            <td class="td-product">Ariel</td>
+            <td class="td-amount">Rp4078</td>
+            <td class="td-qty">23 Packets</td>
+            <td class="td-soid">2757</td>
+            <td class="td-date">15/12/23</td>
+            <td><span class="badge badge-processing">Processing</span></td>
+            <td><span class="pay-delayed">Partial</td>
+          </tr>
+
+          <!-- Row 8 — Scotch Brite -->
+          <tr>
+            <td class="td-product">Scotch Brite</td>
+            <td class="td-amount">Rp3559</td>
+            <td class="td-qty">43 Packets</td>
+            <td class="td-soid">3757</td>
+            <td class="td-date">6/6/23</td>
+            <td><span class="badge badge-confirmed">Confirmed</span></td>
+            <td><span class="pay-paid">Paid</span></td>
+          </tr>
+
+          <!-- Row 9 — Coca Cola -->
+          <tr>
+            <td class="td-product">Coca Cola</td>
+            <td class="td-amount">Rp2055</td>
+            <td class="td-qty">41 Packets</td>
+            <td class="td-soid">2474</td>
+            <td class="td-date">11/11/22</td>
+            <td><span class="badge badge-processing">Processing</span></td>
+            <td><span class="pay-paid">Paid</span></td>
+          </tr>
+
+          <!-- Row 10 — Indomie -->
+          <tr>
+            <td class="td-product">Indomie</td>
+            <td class="td-amount">Rp3120</td>
+            <td class="td-qty">60 Packets</td>
+            <td class="td-soid">4812</td>
+            <td class="td-date">3/2/23</td>
+            <td><span class="badge badge-completed">Completed</span></td>
+            <td><span class="pay-paid">Paid</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="btn-page" disabled>Previous</button>
+        <span class="pagination-info">Page 1 of 10</span>
+        <button class="btn-page">Next</button>
+      </div>
+
+    </div><!-- /table-card -->
+
+  </main>
+</div>
+
+<script>
+const API = 'http://localhost:3000';
+
+async function loadOrders() {
+  const [orders, details] = await Promise.all([
+    fetch(`${API}/sales-order`).then(r => r.json()),
+    fetch(`${API}/detail-item-so/search`).then(r => r.json()),
+  ]);
+
+  // Map detail by id_so (udah ada nama_produk dari join)
+  const detailMap = {};
+  details.forEach(d => {
+    if (!detailMap[d.id_so]) detailMap[d.id_so] = [];
+    detailMap[d.id_so].push(d);
+  });
+
+  const tbody = document.querySelector('tbody');
+  tbody.innerHTML = '';
+
+  orders.forEach(order => {
+    const detail = detailMap[order.id_so] || [];
+    const namaProduk = detail.map(d => d.nama_produk || '-').join(', ');
+    const totalQty = detail.reduce((sum, d) => sum + d.qty, 0);
+    const tanggal = new Date(order.tanggal_so).toLocaleDateString('id-ID');
+
+    const statusBadge = {
+      'Delivered':  'badge-completed',
+      'Confirmed':  'badge-confirmed',
+      'Processing': 'badge-processing',
+      'Draft':      'badge-draft',
+      'Cancelled':  'badge-cancelled',
+    }[order.status_so] || 'badge-draft';
+
+    const payClass = order.status_bayar === 'Lunas' ? 'pay-paid' : 'pay-unpaid';
+    const payText  = order.status_bayar === 'Lunas' ? 'Paid' : 'Unpaid';
+
+    tbody.innerHTML += `
+      <tr>
+        <td class="td-product">${namaProduk}</td>
+        <td class="td-amount">Rp${Number(order.total_bayar).toLocaleString('id-ID')}</td>
+        <td class="td-qty">${totalQty} Packets</td>
+        <td class="td-soid">${order.id_so}</td>
+        <td class="td-date">${tanggal}</td>
+        <td><span class="badge ${statusBadge}">${order.status_so}</span></td>
+        <td><span class="${payClass}">${payText}</span></td>
+      </tr>
+    `;
+  });
+
+  // Update summary
+  document.querySelector('.ov-col:nth-child(1) .ov-val').textContent = orders.length;
+  const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total_bayar), 0);
+  document.querySelector('.ov-col:nth-child(2) .ov-val').textContent = 'Rp' + totalRevenue.toLocaleString('id-ID');
+}
+
+loadOrders();
+</script>
+
+</body>
+</html>

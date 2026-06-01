@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi - My Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── CSS Variables (Konsisten Penuh dengan dashboard.html Anda) ─── */
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --sidebar-bg:#FFFFFF;
+      --primary:   #3B6AE8;
+      --primary-lt:#EEF2FD;
+      --accent:    #F4A93C;
+      --accent-lt: #FEF4E3;
+      --green:     #2ECC7F;
+      --green-lt:  #E5F9F0;
+      --red:       #E84B3A;
+      --red-lt:    #FDECEA;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --header-h:  64px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Sidebar (Tema Terang) ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child { font-size: 10px; font-weight: 500; color: var(--text-light); letter-spacing: .04em; text-transform: uppercase; }
+    .logo-text span:last-child { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--text-mid); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); font-weight: 600; }
+    .nav-icon { width:20px; height:20px; flex-shrink:0; }
+
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ─── Main Area ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--text-light);
+    }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text-dark); font-family: var(--font); font-size:13px; width:100%; }
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+    .avatar { width:36px; height:36px; border-radius:50%; cursor:pointer; }
+
+    .profile-widget {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+}
+
+.avatar-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-lt);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.user-info-header {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-info-header .name {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 13px;
+}
+
+.user-info-header .email {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+    /* Content Area */
+    .content {
+      padding: 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .page-title h1 { font-size: 20px; font-weight: 700; color: var(--text-dark); }
+    .page-title p { font-size: 13px; color: var(--text-mid); margin-top: 2px; }
+
+    /* Filter & Search Bar */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 280px;
+      box-shadow: var(--shadow);
+    }
+    .search-input-wrapper input {
+      border: none; outline: none; font-family: var(--font); font-size: 13px; width: 100%; color: var(--text-dark);
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+    }
+    .filter-tab {
+      padding: 6px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-mid);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-tab.active {
+      background: var(--primary-lt);
+      color: var(--primary);
+    }
+
+    /* ─── KONTEN 1: TABEL MY ORDERS (B2B my orders Design.png) ─── */
+    .orders-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      overflow-x: auto;
+    }
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .orders-table th {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-light);
+      font-weight: 600;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.03em;
+    }
+    .orders-table td {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text-dark);
+      vertical-align: middle;
+    }
+    .orders-table tr:last-child td { border-bottom: none; }
+
+    .id-mono { font-family: var(--mono); font-weight: 600; color: var(--primary); }
+    .date-val { font-size: 13px; color: var(--text-mid); }
+    .price-mono { font-family: var(--mono); font-weight: 600; }
+    
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600;
+    }
+    .status-badge.pending { color: var(--accent); background: var(--accent-lt); }
+    .status-badge.processing { color: var(--primary); background: var(--primary-lt); }
+    .status-badge.completed { color: var(--green); background: var(--green-lt); }
+
+    .btn-view-detail {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .btn-view-detail:hover { background: var(--border); }
+
+    /* ─── KONTEN 2: MODAL DETAIL / POPUP (image_e5fb9f.png - Saat Ikon Mata Ditekan) ─── */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(26, 29, 46, 0.4);
+      z-index: 1000;
+      display: none; /* Dikontrol via JS toggle ikon mata */
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+    .modal-container {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      width: 520px;
+      max-width: 90%;
+      overflow: hidden;
+      animation: modalSlide 0.2s ease-out;
+    }
+    @keyframes modalSlide {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+    .btn-close-modal {
+      background: none; border: none; font-size: 20px; color: var(--text-light); cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Meta Info Row */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      background: var(--bg);
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .meta-item label { font-size: 11px; text-transform: uppercase; color: var(--text-light); font-weight: 600; display: block; margin-bottom: 2px; }
+    .meta-item span { font-size: 13.5px; font-weight: 600; color: var(--text-dark); }
+
+    /* Product Mini List di dalam Detail */
+    .detail-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .detail-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .detail-item-row:last-child { border-bottom: none; }
+    
+    .item-main-info { display: flex; align-items: center; gap: 10px; }
+    .item-icon { width: 34px; height: 34px; background: var(--bg); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .item-title { font-size: 13.5px; font-weight: 700; color: var(--text-dark); }
+    .item-qty-sub { font-size: 11.5px; color: var(--text-light); }
+
+    .item-total-price { font-family: var(--mono); font-size: 13.5px; font-weight: 600; color: var(--text-dark); }
+
+    /* Total Payment Footer */
+    .modal-footer-totals {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .total-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-mid); }
+    .total-row.grand-total { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-top: 4px; }
+    .total-row.grand-total .val { color: var(--primary); }
+
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR (PORTAL PELANGGAN) ══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="customer_dashboard.html">
+      <img src="assets/dashboard.svg" class="nav-icon" onerror="this.style.display='none'"> Dashboard
+    </a>
+    <a class="nav-item" href="catalog.html">
+      <img src="assets/katalog.svg"  class="nav-icon" onerror="this.style.display='none'"> Browse Catalog
+    </a>
+    <a class="nav-item" href="cart.html">
+      <img src="assets/purchase.svg" class="nav-icon" onerror="this.style.display='none'"> My Cart
+    </a>
+    <a class="nav-item active" href="my-orders.html">
+      <img src="assets/order.svg" class="nav-icon" onerror="this.style.display='none'"> My Orders
+    </a>
+    <a class="nav-item" href="invoices.html">
+      <img src="assets/invoices.svg" class="nav-icon" onerror="this.style.display='none'"> Invoices &amp; Credit
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" class="nav-icon" onerror="this.style.display='none'"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" class="nav-icon" onerror="this.style.display='none'"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN AREA ══════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Cari produk populer, kategori, atau nomor pesanan...">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- User Profile Widget -->
+      <div class="profile-widget">
+        <div class="avatar-wrapper">B</div>
+        <div class="user-info-header">
+          <span class="name">Budi Santoso</span>
+          <span class="email">budi@sejahtera.co.id</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- Content Container -->
+  <main class="content">
+    
+    <!-- Page Title -->
+    <div class="page-title">
+      <h1>My Orders</h1>
+      <p>Pantau riwayat pemesanan Grosir, status pembayaran, dan proses logistik armada Anda</p>
+    </div>
+
+    <!-- Controls Row -->
+    <div class="table-controls">
+      <div class="search-input-wrapper">
+        <span>
+          <img src="assets/search.svg" width="16" height="16">
+        </span>
+        <input type="text" placeholder="Cari ID pesanan Anda...">
+      </div>
+
+      <div class="filter-tabs">
+        <div class="filter-tab active">Semua</div>
+        <div class="filter-tab">Diproses</div>
+        <div class="filter-tab">Selesai</div>
+        <div class="filter-tab">Dibatalkan</div>
+      </div>
+    </div>
+
+    <!-- ─── DATA TABEL UTAMA (Sesuai Berkas B2B my orders Design.png) ─── -->
+    <div class="orders-card">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>ID Order</th>
+            <th>Tanggal Pembelian</th>
+            <th>Metode Bayar</th>
+            <th>Total Tagihan</th>
+            <th>Status Order</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Baris 1: Cocok dengan mockup kontainer data -->
+          <tr>
+            <td><span class="id-mono">#ORD-2026-0891</span></td>
+            <td><span class="date-val">28 Mei 2026, 14:32</span></td>
+            <td>Cash on Delivery</td>
+            <td><span class="price-mono">Rp 832.500</span></td>
+            <td><span class="status-badge processing">● Dalam Proses</span></td>
+            <td>
+              <!-- Klik ikon mata ini untuk menampilkan modal detail sesuai permintaan -->
+              <button class="btn-view-detail" onclick="openDetailModal()" title="Lihat Detail">
+                <img src="assets/Action.svg" width="20" height="20">Detail
+              </button>
+            </td>
+          </tr>
+          <!-- Baris 2 -->
+          <tr>
+            <td><span class="id-mono">#ORD-2026-0844</span></td>
+            <td><span class="date-val">15 Mei 2026, 09:15</span></td>
+            <td>Bank Transfer</td>
+            <td><span class="price-mono">Rp 2.450.000</span></td>
+            <td><span class="status-badge completed">● Selesai</span></td>
+            <td>
+              <button class="btn-view-detail" onclick="openDetailModal()" title="Lihat Detail">
+                <img src="assets/Action.svg" width="20" height="20">Detail
+              </button>
+            </td>
+          </tr>
+          <!-- Baris 3 -->
+          <tr>
+            <td><span class="id-mono">#ORD-2026-0712</span></td>
+            <td><span class="date-val">02 Mei 2026, 11:04</span></td>
+            <td>Credit(Net 30)</td>
+            <td><span class="price-mono">Rp 5.120.000</span></td>
+            <td><span class="status-badge completed">● Selesai</span></td>
+            <td>
+              <button class="btn-view-detail" onclick="openDetailModal()" title="Lihat Detail">
+                <img src="assets/Action.svg" width="20" height="20">Detail
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════ MODAL DIALOG DETAIL (Sesuai Berkas image_e5fb9f.png saat mata di-klik) ══════════ -->
+<div class="modal-backdrop" id="orderModal">
+  <div class="modal-container">
+    
+    <div class="modal-header">
+      <h2>Rincian Detail Pesanan</h2>
+      <button class="btn-close-modal" onclick="closeDetailModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      
+      <!-- Meta Details Info -->
+      <div class="meta-grid">
+        <div class="meta-item">
+          <label>ID Pemesanan</label>
+          <span class="id-mono">#ORD-2026-0891</span>
+        </div>
+        <div class="meta-item">
+          <label>Status</label>
+          <span class="status-badge processing" style="padding:2px 8px;">● Diproses</span>
+        </div>
+        <div class="meta-item">
+          <label>Metode Pembayaran</label>
+          <span>Cash on Delivery</span>
+        </div>
+        <div class="meta-item">
+          <label>Waktu Transaksi</label>
+          <span class="date-val" style="font-weight:600;">28 Mei 2026</span>
+        </div>
+      </div>
+
+      <!-- Alamat Pengiriman Singkat -->
+      <div>
+        <label style="font-size: 11px; text-transform: uppercase; color: var(--text-light); font-weight: 700; display:block; margin-bottom: 4px;">Alamat Tujuan</label>
+        <p style="font-size: 13px; color: var(--text-mid); line-height: 1.4;">
+          <strong>Toko Kelontong Sejahtera</strong><br>
+          Jl. Raya Kenangan No. 123, Blok C, Kebayoran Baru, Jakarta Selatan
+        </p>
+      </div>
+
+      <!-- List Produk Yang Dipesan di Dalam Modal -->
+      <div>
+        <label style="font-size: 11px; text-transform: uppercase; color: var(--text-light); font-weight: 700; display:block; margin-bottom: 6px;">Daftar Barang (1 Item)</label>
+        <div class="detail-items-list">
+          
+          <div class="detail-item-row">
+            <div class="item-main-info">
+              <div class="item-icon">🌾</div>
+              <div>
+                <div class="item-title">Beras Premium 5kg</div>
+                <div class="item-qty-sub">Jumlah: 10 Sack &times; Rp 75.000</div>
+              </div>
+            </div>
+            <div class="item-total-price">Rp 750.000</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Detail Perhitungan Biaya Akhir -->
+      <div class="modal-footer-totals">
+        <div class="total-row">
+          <span>Subtotal Barang</span>
+          <span class="val" style="font-family: var(--mono);">Rp 750.000</span>
+        </div>
+        <div class="total-row">
+          <span>Pajak PPN (11%)</span>
+          <span class="val" style="font-family: var(--mono);">Rp 82.500</span>
+        </div>
+        <div class="total-row">
+          <span>Ongkos Kirim</span>
+          <span class="val" style="color:var(--green); font-weight:600;">Gratis</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total Pembayaran</span>
+          <span class="val" style="font-family: var(--mono);">Rp 832.500</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- JavaScript Interaktivitas Modal Detail -->
+<script>
+  const modal = document.getElementById('orderModal');
+
+  function openDetailModal() {
+    modal.style.display = 'flex';
+  }
+
+  function closeDetailModal() {
+    modal.style.display = 'none';
+  }
+
+  // Menutup modal jika pengguna mengeklik area latar belakang hitam transparan
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>

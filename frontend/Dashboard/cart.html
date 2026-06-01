@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi - My Cart (Updated)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── CSS Variables (Konsisten Penuh dengan dashboard.html Anda) ─── */
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --sidebar-bg:#FFFFFF;
+      --primary:   #3B6AE8;
+      --primary-lt:#EEF2FD;
+      --accent:    #F4A93C;
+      --accent-lt: #FEF4E3;
+      --green:     #2ECC7F;
+      --green-lt:  #E5F9F0;
+      --red:       #E84B3A;
+      --red-lt:    #FDECEA;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --header-h:  64px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Sidebar (Tema Terang dashboard.html) ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child { font-size: 10px; font-weight: 500; color: var(--text-light); letter-spacing: .04em; text-transform: uppercase; }
+    .logo-text span:last-child { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--text-mid); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); font-weight: 600; }
+    .nav-icon { width:20px; height:20px; flex-shrink:0; }
+
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ─── Main Area ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--text-light);
+    }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text-dark); font-family: var(--font); font-size:13px; width:100%; }
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+    .avatar { width:36px; height:36px; border-radius:50%; cursor:pointer; }
+
+
+    .profile-widget {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+}
+
+.avatar-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-lt);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.user-info-header {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-info-header .name {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 13px;
+}
+
+.user-info-header .email {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+    /* Content Area */
+    .content {
+      padding: 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Prototype Toggle State Bar */
+    .demo-toggle-bar {
+      background: var(--accent-lt);
+      border: 1px dashed var(--accent);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #A05E03;
+    }
+    .btn-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: var(--font);
+    }
+
+    .page-title h1 { font-size: 20px; font-weight: 700; color: var(--text-dark); }
+    .page-title p { font-size: 13px; color: var(--text-mid); margin-top: 2px; }
+
+    /* ─── STATE 1: EMPTY CART ─── */
+    #cart-empty-state {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .empty-illustration { font-size: 64px; margin-bottom: 20px; }
+    #cart-empty-state h2 { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+    #cart-empty-state p { font-size: 13.5px; color: var(--text-light); margin-bottom: 24px; max-width: 320px; }
+    .btn-browse {
+      background: var(--primary);
+      color: #FFFFFF;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* ─── STATE 2: FILLED CART (Sesuai Updatenya pada B2B mycart Design.png) ─── */
+    #cart-filled-state {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Gaya Card Layout yang Seirama dengan Dashboard.html */
+    .cart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .card-subtitle {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Tabel Daftar Item */
+    .cart-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .cart-table th {
+      text-align: left;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-light);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .cart-table td {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .cart-table tr:last-child td {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .cart-item-info { display: flex; align-items: center; gap: 12px; }
+    .cart-item-img {
+      width: 46px; height: 46px; background: var(--bg);
+      border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .cart-item-detail .name { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+    .cart-item-detail .sku { font-family: var(--mono); font-size: 11px; color: var(--text-light); }
+
+    .cart-price, .cart-subtotal { font-family: var(--mono); font-size: 13.5px; font-weight: 600; color: var(--text-dark); }
+    .cart-subtotal { color: var(--primary); font-weight: 700; }
+
+    /* Qty Counter */
+    .qty-counter {
+      display: inline-flex; align-items: center; justify-content: space-between;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 4px 8px; background: var(--bg); width: 95px;
+    }
+    .qty-btn { background: none; border: none; font-size: 14px; color: var(--text-mid); cursor: pointer; width: 18px; height: 18px; }
+    .qty-val { font-size: 13px; font-weight: 600; font-family: var(--mono); color: var(--text-dark); }
+
+    .btn-delete {
+      background: none; border: none; color: var(--red); cursor: pointer; font-size: 15px; padding: 4px; border-radius: 4px;
+    }
+    .btn-delete:hover { background: var(--red-lt); }
+
+    /* Shipping Address & Notes (Form Style Sesuai Dashboard Theme) */
+    .address-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-size: 13.5px;
+      color: var(--text-mid);
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+    .address-header {
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-change-addr {
+      font-size: 12px; color: var(--primary); font-weight: 600; background: none; border: none; cursor: pointer;
+    }
+
+    .notes-textarea {
+      width: 100%;
+      height: 75px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font);
+      font-size: 13px;
+      color: var(--text-dark);
+      resize: none;
+      outline: none;
+      margin-top: 6px;
+    }
+    .notes-textarea:focus {
+      border-color: var(--primary);
+    }
+
+    /* Payment Methods Options Grid */
+    .payment-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .payment-option {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      background: var(--bg);
+      transition: all 0.15s;
+    }
+    .payment-option.active {
+      background: var(--primary-lt);
+      border-color: var(--primary);
+    }
+    .payment-option .icon { font-size: 20px; }
+    .payment-option .label { font-size: 12.5px; font-weight: 600; color: var(--text-dark); }
+    .payment-option .desc { font-size: 10.5px; color: var(--text-light); text-align: center; }
+
+    /* Summary Sidebar (Kanan) */
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      position: sticky;
+      top: 88px;
+    }
+    .summary-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 18px; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--text-mid); margin-bottom: 12px; }
+    .summary-row.total {
+      border-top: 1px solid var(--border); padding-top: 14px; margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--text-dark);
+    }
+    .summary-row .val { font-family: var(--mono); font-weight: 600; }
+    .summary-row.total .val { color: var(--primary); font-weight: 700; }
+
+    .btn-checkout {
+      width: 100%; background: var(--primary); color: #FFFFFF; border: none; padding: 12px;
+      border-radius: var(--radius-sm); font-weight: 600; font-size: 13.5px; cursor: pointer; margin-top: 16px; transition: background 0.15s;
+    }
+    .btn-checkout:hover { background: #2F56C4; }
+
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      #cart-filled-state { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR (PORTAL PELANGGAN - TEMA TERANG KONSISTEN) ══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="customer_dashboard.html">
+      <img src="assets/dashboard.svg" class="nav-icon" onerror="this.style.display='none'"> Dashboard
+    </a>
+    <a class="nav-item" href="catalog.html">
+      <img src="assets/katalog.svg" class="nav-icon" onerror="this.style.display='none'"> Browse Catalog
+    </a>
+    <a class="nav-item active" href="cart.html">
+      <img src="assets/purchase.svg" class="nav-icon" onerror="this.style.display='none'"> My Cart
+    </a>
+    <a class="nav-item" href="my-orders.html">
+      <img src="assets/order.svg" class="nav-icon" onerror="this.style.display='none'"> My Orders
+    </a>
+    <a class="nav-item" href="invoices.html">
+      <img src="assets/invoices.svg" class="nav-icon" onerror="this.style.display='none'"> Invoices &amp; Credit
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" class="nav-icon" onerror="this.style.display='none'"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" class="nav-icon" onerror="this.style.display='none'"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN AREA ══════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Cari produk populer, kategori, atau nomor pesanan...">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- User Profile Widget -->
+      <div class="profile-widget">
+        <div class="avatar-wrapper">B</div>
+        <div class="user-info-header">
+          <span class="name">Budi Santoso</span>
+          <span class="email">budi@sejahtera.co.id</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- Content Container -->
+  <main class="content">
+    
+    <!-- Widget Kontrol Demo Swapping (Untuk beralih state kosong/isi) -->
+    <div class="demo-toggle-bar">
+      <span>💡 <strong>Prototype Switcher:</strong> Klik tombol kanan untuk meninjau halaman sewaktu berisi produk lengkap dengan Alamat, Notes & Metode Pembayaran.</span>
+      <button class="btn-toggle" onclick="toggleCartState()">Switch State Tampilan</button>
+    </div>
+
+    <!-- Page Title -->
+    <div class="page-title">
+      <h1>My Cart</h1>
+      <p>Selesaikan data pengiriman dan metode pembayaran sebelum mengirimkan pesanan</p>
+    </div>
+
+    <!-- ─── STATE 1: SEWAKTU CART KOSONG ─── -->
+    <div id="cart-empty-state" style="display: none;">
+      <div class="empty-illustration">🛒</div>
+      <h2>Keranjang Belanja Anda Kosong</h2>
+      <p>Anda belum memasukkan produk apa pun ke dalam keranjang belanja.</p>
+      <a href="catalog.html" class="btn-browse">Browse Katalog Sekarang</a>
+    </div>
+
+    <!-- ─── STATE 2: FILLED CART DENGAN TAMBAHAN ALAMAT, NOTES, & PAYMENT METHOD ─── -->
+    <div id="cart-filled-state">
+      
+      <!-- Kolon Kiri: Info Pembelian & Checkout Detail -->
+      <div class="left-column">
+        
+        <!-- 1. Daftar Item (Cart Items List) -->
+        <div class="cart-card">
+          <div class="card-subtitle">📦 Item yang Dipesan</div>
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Produk</th>
+                <th>Harga</th>
+                <th>Jumlah</th>
+                <th>Subtotal</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Item 1: Beras Premium 5kg -->
+              <tr>
+                <td>
+                  <div class="cart-item-info">
+                    <div class="cart-item-img">🌾</div>
+                    <div class="cart-item-detail">
+                      <div class="name">Beras Premium 5kg</div>
+                      <div class="sku">BRS-001</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="cart-price">Rp 75.000</span></td>
+                <td>
+                  <div class="qty-counter">
+                    <button class="qty-btn">−</button>
+                    <span class="qty-val">10</span>
+                    <button class="qty-btn">+</button>
+                  </div>
+                </td>
+                <td><span class="cart-subtotal">Rp 750.000</span></td>
+                <td><button class="btn-delete" title="Hapus">
+                  <img src="assets/delete.svg" width="16" height="16">
+                </button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 2. Shipping Address Section (Baru - Sesuai Gambar .png) -->
+        <div class="cart-card">
+          <div class="card-subtitle">📍 Shipping Address</div>
+          <div class="address-box">
+            <div class="address-header">
+              <span>Toko Kelontong Sejahtera (Gudang Utama)</span>
+              <button class="btn-change-addr">Ubah Alamat</button>
+            </div>
+            Jl. Raya Kenangan No. 123, Blok C, Kebayoran Baru, Jakarta Selatan, DKI Jakarta, 12150<br>
+            <small style="color: var(--text-light); font-weight: 500;">Penerima: Budi Santoso (+62 812-3456-7890)</small>
+          </div>
+        </div>
+
+        <!-- 3. Payment Methods Section (Baru - Sesuai Gambar .png) -->
+        <div class="cart-card">
+          <div class="card-subtitle">💳 Payment Method</div>
+          <div class="payment-grid">
+            
+            <!-- Opsi 1: COD (Active default) -->
+            <div class="payment-option active" onclick="selectPayment(this)">
+              <div class="icon">💵</div>
+              <div class="label">Cash on Delivery</div>
+              <div class="desc">Bayar tunai saat barang sampai</div>
+            </div>
+
+            <!-- Opsi 2: Bank Transfer -->
+            <div class="payment-option" onclick="selectPayment(this)">
+              <div class="icon">🏦</div>
+              <div class="label">Bank Transfer</div>
+              <div class="desc">Konfirmasi otomatis via Virtual Account</div>
+            </div>
+
+            <!-- Opsi 3: Term of Payment (TOP) -->
+            <div class="payment-option" onclick="selectPayment(this)">
+              <div class="icon">⏳</div>
+              <div class="label">Credit(Net30)</div>
+              <div class="desc">Tempo pembayaran(30 Hari)</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 4. Notes Section (Baru - Sesuai Gambar .png) -->
+        <div class="cart-card">
+          <div class="card-subtitle">📝 Order Notes (Opsional)</div>
+          <textarea class="notes-textarea" placeholder="Contoh: Tolong kirim sebelum jam 3 sore, atau taruh barang di dekat pintu gerbang utama..."></textarea>
+        </div>
+
+      </div>
+
+      <!-- Kolon Kanan: Summary Total Resumen Pembayaran -->
+      <div class="summary-card">
+        <div class="summary-title">Ringkasan Belanja</div>
+        <div class="summary-row">
+          <span>Total Item</span>
+          <span class="val">10 Sack</span>
+        </div>
+        <div class="summary-row">
+          <span>Subtotal Goods</span>
+          <span class="val">Rp 750.000</span>
+        </div>
+        <div class="summary-row">
+          <span>Pajak (PPN 11%)</span>
+          <span class="val">Rp 82.500</span>
+        </div>
+        <div class="summary-row">
+          <span>Biaya Pengiriman</span>
+          <span class="val" style="color: var(--green); font-weight: 600;">Gratis</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Bayar</span>
+          <span class="val">Rp 832.500</span>
+        </div>
+
+        <button class="btn-checkout">Kirim &amp; Proses Pesanan</button>
+
+        <a href="catalog.html" style="text-decoration: none; display: block;text-align: center; margin-top: 12px;">
+          <button class="btn-checkout" style="background: var(--surface); color: #000000; border: 1px solid var(--border); margin-top: 0; width: 100%;">
+        Continue Shopping
+          </button>
+        </a>
+    </div>
+
+  </div>
+
+  </main>
+</div>
+
+<!-- JavaScript Ringan untuk Interaktivitas Demo & Pemilihan Metode Pembayaran -->
+<script>
+  let isEmpty = false; // Set default ke berisi barang agar langsung terlihat updatenya
+  const emptyState = document.getElementById('cart-empty-state');
+  const filledState = document.getElementById('cart-filled-state');
+
+  function toggleCartState() {
+    isEmpty = !isEmpty;
+    if (isEmpty) {
+      emptyState.style.display = 'flex';
+      filledState.style.display = 'none';
+    } else {
+      emptyState.style.display = 'none';
+      filledState.style.display = 'grid';
+    }
+  }
+
+  function selectPayment(element) {
+    // Hilangkan kelas active dari opsi pembayaran lainnya
+    const options = document.querySelectorAll('.payment-option');
+    options.forEach(opt => opt.classList.remove('active'));
+    // Tambahkan ke opsi yang diklik
+    element.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

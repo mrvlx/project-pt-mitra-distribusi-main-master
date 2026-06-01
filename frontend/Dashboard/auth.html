@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi — Auth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── Variables ─── */
+    :root {
+      --primary:     #2B5EE8;
+      --primary-hov: #1F4DC5;
+      --text-dark:   #1A1D2E;
+      --text-mid:    #5A607A;
+      --text-light:  #9AA3B8;
+      --border:      #D6DCE8;
+      --border-focus:#2B5EE8;
+      --bg:          #F5F7FB;
+      --surface:     #FFFFFF;
+      --error:       #E84B3A;
+      --radius:      10px;
+      --font:        'Plus Jakarta Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--surface);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* ══════════ LAYOUT ══════════ */
+    .auth-wrapper {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* ── Left panel ── */
+    .auth-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      padding: 60px 40px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      max-width: 360px;
+    }
+
+    /* Logo image placeholder */
+    .brand-logo {
+      width: 220px;
+      height: 200px;
+      background: var(--bg);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-light);
+      letter-spacing: .04em;
+      text-align: center;
+    }
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-text { margin-top: 8px; }
+    .brand-text .brand-pt {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-mid);
+      letter-spacing: .06em;
+    }
+    .brand-text .brand-name {
+      display: block;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-dark);
+      line-height: 1.1;
+      letter-spacing: -.5px;
+    }
+    .brand-text .brand-tagline {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-light);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* Divider between panels */
+    .auth-divider {
+      display: none;
+    }
+
+    /* ── Left panel - hidden ── */
+    .auth-left {
+      display: none;
+    }
+
+    /* ── Right panel ── */
+    .auth-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      background: var(--surface);
+    }
+
+    /* ══════════ FORM CARD ══════════ */
+    .form-card {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Small logo top of form */
+    .form-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .form-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .form-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-dark);
+      text-align: center;
+      letter-spacing: -.4px;
+    }
+
+    .form-subtitle {
+      font-size: 13.5px;
+      color: var(--text-mid);
+      text-align: center;
+      margin-top: 6px;
+      margin-bottom: 28px;
+    }
+
+    /* ── Form fields ── */
+    .form-body {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 13.5px;
+      color: var(--text-dark);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .field input::placeholder { color: var(--text-light); }
+    .field input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(43,94,232,.12);
+    }
+
+    .field-hint {
+      font-size: 11.5px;
+      color: var(--text-light);
+      margin-top: -4px;
+    }
+
+    /* Remember + Forgot row */
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: -4px;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: var(--text-mid);
+      cursor: pointer;
+      user-select: none;
+    }
+    .remember input[type="checkbox"] {
+      width: 15px; height: 15px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .forgot-link:hover { text-decoration: underline; }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .18s, transform .1s;
+      letter-spacing: .01em;
+    }
+    .btn-primary:hover  { background: var(--primary-hov); }
+    .btn-primary:active { transform: scale(.98); }
+
+    /* Separator */
+    .form-sep {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-light);
+      font-size: 12px;
+    }
+    .form-sep::before,
+    .form-sep::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Switch link */
+    .form-switch {
+      font-size: 13px;
+      color: var(--text-mid);
+      text-align: center;
+      margin-top: 8px;
+    }
+    .form-switch a {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .form-switch a:hover { text-decoration: underline; }
+
+    /* ══════════ TOGGLE LOGIN / SIGNUP ══════════ */
+    #form-signup { display: none; }
+
+    /* ══════════ RESPONSIVE ══════════ */
+    @media (max-width: 700px) {
+      .auth-left    { display: none; }
+      .auth-divider { display: none; }
+      .auth-right   { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+  <div class="auth-left">
+    <div class="brand">
+      <img src="assets/Object.svg" alt="PT Mitra Distribusi" width="220" class="brand-logo">
+      <div class="brand-text">
+        <span class="brand-pt">PT</span>
+        <span class="brand-name">Mitra Distribusi</span>
+        <span class="brand-tagline">Global Industrial Logistics &amp; Supply Chain</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-divider"></div>
+
+  <div class="auth-right">
+
+    <div class="form-card" id="form-login">
+      <img src="assets/Object.svg" alt="Logo" width="48" height="48" class="form-logo">
+      <h1 class="form-title">Log in to your account</h1>
+      <p class="form-subtitle">Welcome back! Please enter your details.</p>
+
+      <div class="form-body">
+        <div class="field">
+          <label for="login-identifier">Nama atau Email</label>
+          <input type="text" id="login-identifier" placeholder="Masukkan nama atau email Anda" autocomplete="username"/>
+        </div>
+
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+
+        <button class="btn-primary" onclick="handleLogin()">Sign in</button>
+
+        <p class="form-switch">
+          Don't have an account?
+          <a onclick="showSignup()">Sign up</a>
+        </p>
+      </div>
+    </div>
+
+
+    <div class="form-card" id="form-signup">
+      <img src="assets/Object.svg" alt="Logo" width="48" height="48" class="form-logo">
+      <h1 class="form-title">Create an account</h1>
+      <p class="form-subtitle">Start your 30-day free trial.</p>
+
+      <div class="form-body">
+        <div class="field">
+          <label for="signup-name">Name*</label>
+          <input type="text" id="signup-name" placeholder="Enter your name" autocomplete="name"/>
+        </div>
+
+        <div class="field">
+          <label for="signup-email">Email*</label>
+          <input type="email" id="signup-email" placeholder="Enter your email" autocomplete="email"/>
+        </div>
+
+        <div class="field">
+          <label for="signup-password">Password*</label>
+          <input type="password" id="signup-password" placeholder="Create a password" autocomplete="new-password"/>
+          <span class="field-hint">Must be at least 8 characters.</span>
+        </div>
+
+        <button class="btn-primary" onclick="handleSignup()">Get started</button>
+
+        <p class="form-switch">
+          Already have an account?
+          <a onclick="showLogin()">Log in</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showSignup() {
+    document.getElementById('form-login').style.display  = 'none';
+    document.getElementById('form-signup').style.display = 'flex';
+  }
+  function showLogin() {
+    document.getElementById('form-signup').style.display = 'none';
+    document.getElementById('form-login').style.display  = 'flex';
+  }
+
+  // Handler untuk login (Bisa menggunakan Nama / Email)
+  function handleLogin() {
+    const identifier = document.getElementById('login-identifier').value;
+    const password = document.getElementById('login-password').value;
+    
+    if (!identifier || !password) {
+      alert('Silakan isi nama/email dan password');
+      return;
+    }
+
+    // Mengirim payload 'identifier' (bisa dibaca backend sebagai email OR name)
+    fetch('http://localhost:3000/users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ identifier, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('email', data.user.email);
+        localStorage.setItem('role', data.user.role);
+        
+        // Pengalihan langsung (Redirect) berbasis Role hasil verifikasi database
+        if (data.user.role === 'admin') {
+          window.location.replace('dashboard.html');
+        } else {
+          window.location.replace('customer_dashboard.html');
+        }
+      } else {
+        alert(data.message || 'Nama/Email atau password salah!');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Terjadi kesalahan saat login. Pastikan backend server berjalan!');
+    });
+  }
+  
+  // Handler untuk Sign Up (Deteksi Otomatis & Langsung Tembus Dashboard)
+  function handleSignup() {
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    
+    if (!name || !email || !password) {
+      alert('Silakan isi semua field yang diperlukan');
+      return;
+    }
+    
+    if (password.length < 8) {
+      alert('Password harus minimal 8 karakter');
+      return;
+    }
+
+    // Otomatisasi Role di Frontend
+    let role = 'customer';
+    if (email.trim().toLowerCase() === 'admin@mitradistribusi.com') {
+      role = 'admin';
+    }
+    
+    fetch('http://localhost:3000/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, email, password, role })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message === 'User berhasil ditambahkan' || data.user) {
+        // Ambil payload user dari database atau buat tiruan instan untuk sesi login otomatis
+        const activeUser = data.user || { name, email, role };
+        
+        localStorage.setItem('user', JSON.stringify(activeUser));
+        localStorage.setItem('email', email);
+        localStorage.setItem('role', role);
+
+        // Perbaikan Utama: Menggunakan window.location.replace() agar langsung meluncur 
+        // ke dashboard tanpa stuck di form otentikasi.
+        if (role === 'admin') {
+          window.location.replace('dashboard.html');
+        } else {
+          window.location.replace('customer_dashboard.html');
+        }
+      } else {
+        alert(data.message || 'Gagal membuat akun');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Terjadi kesalahan saat membuat akun. Pastikan backend server berjalan!');
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi - Browse Catalog</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── CSS Variables (Diselaraskan Total dengan dashboard.html milik Anda) ─── */
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --sidebar-bg:#FFFFFF; /* Berubah menjadi putih bersih sesuai dashboard.html */
+      --primary:   #3B6AE8;
+      --primary-lt:#EEF2FD;
+      --accent:    #F4A93C;
+      --accent-lt: #FEF4E3;
+      --green:     #2ECC7F;
+      --green-lt:  #E5F9F0;
+      --red:       #E84B3A;
+      --red-lt:    #FDECEA;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --header-h:  64px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Sidebar (Gaya Terang Sesuai dashboard.html) ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .logo-text span:first-child {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-light);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .logo-text span:last-child {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--text-mid); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active {
+      background: var(--primary-lt);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .nav-icon {
+      width:20px; height:20px; flex-shrink:0;
+    }
+
+    .sidebar-footer {
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* ─── Main Content Area ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Header (Mengikuti Header dashboard.html) ── */
+    .header {
+      height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--text-light);
+    }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text-dark); font-family: var(--font); font-size:13px; width:100%; }
+    
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+    .avatar {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; overflow: hidden;
+    }
+
+    .profile-widget {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+}
+
+.avatar-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-lt);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.user-info-header {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-info-header .name {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 13px;
+}
+
+.user-info-header .email {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+
+    /* ─── Content Wrapper ─── */
+    .content {
+      padding: 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Catalog Title Area */
+    .catalog-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .catalog-title-row h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .catalog-title-row p {
+      font-size: 13px;
+      color: var(--text-mid);
+      margin-top: 2px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover {
+      background: #2F56C4;
+    }
+
+    /* ─── Filter & Sub-Search Bar (Gaya Card dashboard.html) ─── */
+    .filter-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+    }
+    
+    .catalog-subsearch {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+      font-family: var(--font);
+      min-width: 150px;
+    }
+
+    .filter-badge {
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-mid);
+      background: var(--bg);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .filter-badge:hover { background: var(--border); color: var(--text-dark); }
+    .filter-badge.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    /* ─── Catalog Products Grid (Gaya Card Seirama Dashboard) ─── */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s;
+    }
+    .product-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .product-img-box {
+      height: 140px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 48px;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .sku-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-mid);
+      background: var(--primary-lt);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .category-tag {
+      font-size: 12px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .product-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+    .product-desc {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: auto;
+      margin-bottom: 10px;
+    }
+    .price-value {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .price-unit {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .stock-status {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+      background: var(--green-lt);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      width: fit-content;
+    }
+    .stock-status.low {
+      color: var(--red);
+      background: var(--red-lt);
+    }
+
+    /* Quantity Controls & Add Button */
+    .action-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 8px;
+    }
+    .qty-counter {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
+      background: var(--bg);
+    }
+    .qty-btn {
+      background: none;
+      border: none;
+      font-size: 15px;
+      color: var(--text-mid);
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+    }
+    .qty-val {
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--text-dark);
+    }
+
+    .btn-add-cart {
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR (Sesuai Tema Terang dashboard.html) ══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="customer_dashboard.html">
+      <img src="assets/dashboard.svg" class="nav-icon" onerror="this.style.display='none'"> Dashboard
+    </a>
+    <a class="nav-item active" href="catalog.html">
+      <img src="assets/katalog.svg" class="nav-icon" onerror="this.style.display='none'"> Browse Catalog
+    </a>
+    <a class="nav-item" href="cart.html">
+      <img src="assets/purchase.svg" class="nav-icon" onerror="this.style.display='none'"> My Cart
+    </a>
+    <a class="nav-item" href="my-orders.html">
+      <img src="assets/order.svg" class="nav-icon" onerror="this.style.display='none'"> My Orders
+    </a>
+    <a class="nav-item" href="invoices.html">
+      <img src="assets/invoices.svg" class="nav-icon" onerror="this.style.display='none'"> Invoices &amp; Credit
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="#">
+      <img src="assets/setting.svg" class="nav-icon" onerror="this.style.display='none'"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" class="nav-icon" onerror="this.style.display='none'"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN AREA ══════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Cari produk populer, kategori, atau nomor pesanan...">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- User Profile Widget -->
+      <div class="profile-widget">
+        <div class="avatar-wrapper">B</div>
+        <div class="user-info-header">
+          <span class="name">Budi Santoso</span>
+          <span class="email">budi@sejahtera.co.id</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- Content -->
+  <main class="content">
+    
+    <!-- Title Row -->
+    <div class="catalog-title-row">
+      <div>
+        <h1>Browse Catalog</h1>
+        <p>Belanja kebutuhan bisnis Anda dengan mudah dari PT Mitra Distribusi</p>
+      </div>
+      <a href="cart.html" class="btn-primary">
+       <div class="action-icon">
+              <img src="assets/Viewcart.svg" width="18" height="18">
+       </div> 
+        View Cart
+      </a>
+    </div>
+
+    <!-- Filter Card (Gaya Kotak Card Elegan sesuai Dashboard) -->
+    <div class="filter-card">
+      <input type="text" class="catalog-subsearch" placeholder="produk atau...">
+      <div class="filter-badge active">Semua</div>
+      <div class="filter-badge">Beras</div>
+      <div class="filter-badge">Minyak</div>
+      <div class="filter-badge">Gula</div>
+      <div class="filter-badge">Tepung</div>
+      <div class="filter-badge">Bumbu</div>
+      <div class="filter-badge">Instant</div>
+      <div class="filter-badge">Household</div>
+      <div class="filter-badge">Beverage</div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="catalog-grid">
+
+      <!-- Produk 1 -->
+      <div class="product-card">
+        <div class="product-img-box">🌾</div>
+        <div class="meta-row">
+          <span class="sku-badge">BRS-001</span>
+          <span class="category-tag">Beras</span>
+        </div>
+        <h2 class="product-title">Beras Premium 5kg</h2>
+        <p class="product-desc">Beras putih premium kualitas terbaik</p>
+        <div class="price-row">
+          <span class="price-value">Rp 75.000</span>
+          <span class="price-unit">/Sack</span>
+        </div>
+        <div class="stock-status">
+          Stok: 1.240 Sack
+        </div>
+        <div class="action-row">
+          <div class="qty-counter">
+            <button class="qty-btn">−</button>
+            <span class="qty-val">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+          <button class="btn-add-cart">Add</button>
+        </div>
+      </div>
+
+      <!-- Produk 2 -->
+      <div class="product-card">
+        <div class="product-img-box">🌾</div>
+        <div class="meta-row">
+          <span class="sku-badge">BRS-002</span>
+          <span class="category-tag">Beras</span>
+        </div>
+        <h2 class="product-title">Beras Medium 25kg</h2>
+        <p class="product-desc">Beras untuk konsumsi harian berkualitas</p>
+        <div class="price-row">
+          <span class="price-value">Rp 320.000</span>
+          <span class="price-unit">/Sack</span>
+        </div>
+        <div class="stock-status">
+          Stok: 580 Sack
+        </div>
+        <div class="action-row">
+          <div class="qty-counter">
+            <button class="qty-btn">−</button>
+            <span class="qty-val">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+          <button class="btn-add-cart">Add</button>
+        </div>
+      </div>
+
+      <!-- Produk 3 -->
+      <div class="product-card">
+        <div class="product-img-box">🛢️</div>
+        <div class="meta-row">
+          <span class="sku-badge">MNK-001</span>
+          <span class="category-tag">Minyak</span>
+        </div>
+        <h2 class="product-title">Minyak Goreng 2L</h2>
+        <p class="product-desc">Minyak goreng kelapa sawit jernih alami</p>
+        <div class="price-row">
+          <span class="price-value">Rp 38.000</span>
+          <span class="price-unit">/Bottle</span>
+        </div>
+        <div class="stock-status">
+          Stok: 2.100 Bottle
+        </div>
+        <div class="action-row">
+          <div class="qty-counter">
+            <button class="qty-btn">−</button>
+            <span class="qty-val">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+          <button class="btn-add-cart">Add</button>
+        </div>
+      </div>
+
+      <!-- Produk 4 -->
+      <div class="product-card">
+        <div class="product-img-box">🛢️</div>
+        <div class="meta-row">
+          <span class="sku-badge">MNK-002</span>
+          <span class="category-tag">Minyak</span>
+        </div>
+        <h2 class="product-title">Minyak Goreng 5L</h2>
+        <p class="product-desc">Minyak goreng ukuran ekonomis jerigen</p>
+        <div class="price-row">
+          <span class="price-value">Rp 92.000</span>
+          <span class="price-unit">/Jerigen</span>
+        </div>
+        <div class="stock-status low">
+          Stok Tipis: 42 Jerigen
+        </div>
+        <div class="action-row">
+          <div class="qty-counter">
+            <button class="qty-btn">−</button>
+            <span class="qty-val">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+          <button class="btn-add-cart">Add</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Hapus Produk</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+
+    :root{
+      --bg:#F4F6FB;
+      --surface:#FFFFFF;
+      --primary:#2B5EE8;
+      --red:#E84B3A;
+      --border:#E8ECF4;
+      --text-dark:#1A1D2E;
+      --text-mid:#5A607A;
+      --radius:14px;
+      --shadow:0 2px 12px rgba(30,40,80,.07);
+      --font:'Plus Jakarta Sans', sans-serif;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:var(--bg);
+      font-family:var(--font);
+      padding:40px;
+      color:var(--text-dark);
+    }
+
+    .container{
+      max-width:600px;
+      margin:auto;
+    }
+
+    .title{
+      font-size:28px;
+      font-weight:800;
+      margin-bottom:24px;
+    }
+
+    .card{
+      background:var(--surface);
+      border-radius:var(--radius);
+      padding:32px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--border);
+    }
+
+    .form-group{
+      margin-bottom:24px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:10px;
+      font-weight:600;
+      color:var(--text-mid);
+    }
+
+    select{
+      width:100%;
+      padding:14px;
+      border-radius:10px;
+      border:1.5px solid var(--border);
+      font-family:var(--font);
+      font-size:14px;
+      outline:none;
+    }
+
+    select:focus{
+      border-color:var(--primary);
+    }
+
+    .warning-box{
+      background:#FDECEA;
+      color:var(--red);
+      padding:14px;
+      border-radius:10px;
+      font-size:14px;
+      margin-bottom:24px;
+    }
+
+    .button-group{
+      display:flex;
+      justify-content:flex-end;
+      gap:12px;
+    }
+
+    .btn{
+      padding:14px 20px;
+      border:none;
+      border-radius:10px;
+      font-family:var(--font);
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      transition:.2s;
+      font-size:14px;
+    }
+
+    .btn-secondary{
+      background:#E9EDF7;
+      color:var(--text-dark);
+    }
+
+    .btn-secondary:hover{
+      background:#DCE3F2;
+    }
+
+    .btn-danger{
+      background:var(--red);
+      color:white;
+    }
+
+    .btn-danger:hover{
+      background:#C83D30;
+    }
+
+    .message{
+      margin-top:20px;
+      padding:14px;
+      border-radius:10px;
+      display:none;
+      font-size:14px;
+    }
+
+    .success{
+      background:#E5F9F0;
+      color:#2ECC71;
+    }
+
+    .error{
+      background:#FDECEA;
+      color:#E84B3A;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1 class="title">
+    Hapus Produk
+  </h1>
+
+  <div class="card">
+
+    <div class="warning-box">
+      Produk yang dihapus tidak dapat dikembalikan.
+    </div>
+
+    <form id="delete-form">
+
+      <div class="form-group">
+
+        <label>Pilih Produk</label>
+
+        <select id="product-select" required>
+
+          <option value="">
+            Memuat produk...
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="button-group">
+
+        <a
+          href="inventory.html"
+          class="btn btn-secondary"
+        >
+          Kembali
+        </a>
+
+        <button
+          type="submit"
+          class="btn btn-danger"
+        >
+          Hapus Produk
+        </button>
+
+      </div>
+
+    </form>
+
+    <div id="message-box" class="message"></div>
+
+  </div>
+
+</div>
+
+<script>
+
+const BASE_URL =
+'http://localhost:3000';
+
+const productSelect =
+document.getElementById('product-select');
+
+const messageBox =
+document.getElementById('message-box');
+
+
+// LOAD PRODUK
+async function loadProduk(){
+
+    try{
+
+        const response =
+        await fetch(
+            `${BASE_URL}/produk`
+        );
+
+        const produk =
+        await response.json();
+
+        productSelect.innerHTML =
+        `
+        <option value="">
+          Pilih Produk
+        </option>
+        `;
+
+        produk.forEach(item => {
+
+            productSelect.innerHTML += `
+                <option value="${item.id_produk}">
+                    ${item.nama_produk}
+                </option>
+            `;
+
+        });
+
+    }catch(error){
+
+        console.log(error);
+
+        productSelect.innerHTML =
+        `
+        <option>
+          Gagal memuat produk
+        </option>
+        `;
+
+    }
+
+}
+
+
+// DELETE PRODUK
+document
+.getElementById('delete-form')
+.addEventListener('submit', async (e)=>{
+
+    e.preventDefault();
+
+    const idProduk =
+    productSelect.value;
+
+    if(!idProduk){
+
+        alert('Pilih produk terlebih dahulu');
+
+        return;
+    }
+
+    const konfirmasi =
+    confirm(
+      'Yakin ingin menghapus produk ini?'
+    );
+
+    if(!konfirmasi){
+        return;
+    }
+
+    try{
+
+        const response =
+        await fetch(
+            `${BASE_URL}/produk/${idProduk}`,
+            {
+                method:'DELETE'
+            }
+        );
+
+        const result =
+        await response.json();
+
+        if(response.ok){
+
+            messageBox.style.display =
+            'block';
+
+            messageBox.className =
+            'message success';
+
+            messageBox.innerHTML =
+            'Produk berhasil dihapus';
+
+            loadProduk();
+
+            setTimeout(()=>{
+
+                window.location.href =
+                'inventory.html';
+
+            }, 1500);
+
+        }else{
+
+            messageBox.style.display =
+            'block';
+
+            messageBox.className =
+            'message error';
+
+            messageBox.innerHTML =
+            result.message ||
+            'Gagal menghapus produk';
+
+        }
+
+    }catch(error){
+
+        console.log(error);
+
+        messageBox.style.display =
+        'block';
+
+        messageBox.className =
+        'message error';
+
+        messageBox.innerHTML =
+        'Terjadi kesalahan server';
+
+    }
+
+});
+
+
+// INIT
+loadProduk();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi — Reports</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --primary:   #2B5EE8;
+      --primary-lt:#EEF2FD;
+      --green:     #22C55E;
+      --amber:     #F59E0B;
+      --red:       #EF4444;
+      --grey:      #9AA3B8;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; font-size: 14px; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 100; padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      padding: 20px 20px 16px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child { font-size: 10px; font-weight: 500; color: var(--text-light); letter-spacing: .04em; text-transform: uppercase; }
+    .logo-text span:last-child  { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; color: var(--text-mid); font-weight: 500;
+      font-size: 13.5px; text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover  { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); }
+    .nav-icon {
+      width: 20px; height: 20px; border-radius: 5px;
+      background: currentColor; opacity: .18; flex-shrink: 0;
+      /* ASET: ganti dengan <img src="icon-xxx.svg" width="20" height="20"> */
+    }
+    .nav-item.active .nav-icon { opacity: 1; background: var(--primary); }
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ══ HEADER ══ */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 28px; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .search-bar {
+      flex: 1; max-width: 400px; display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 100px; padding: 8px 16px; color: var(--text-light); font-size: 13px;
+    }
+    .search-icon { width: 16px; height: 16px; background: var(--text-light); border-radius: 50%; flex-shrink: 0;
+      /* ASET: ganti dengan <img src="icon-search.svg"> */ }
+    .search-bar input { border: none; background: transparent; outline: none; color: var(--text-dark); font-family: var(--font); font-size: 13px; width: 100%; }
+    .search-bar input::placeholder { color: var(--text-light); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .notif-btn {
+      width: 36px; height: 36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
+    }
+    .bell-icon { width: 16px; height: 16px; background: var(--text-mid); border-radius: 4px;
+      /* ASET: ganti dengan <img src="icon-bell.svg"> */ }
+    .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; overflow: hidden;
+      /* ASET: ganti dengan <img src="avatar.jpg" width="36" height="36"> */
+    }
+
+    /* ══ CONTENT ══ */
+    .content { padding: 28px; display: flex; flex-direction: column; gap: 24px; }
+
+    /* ══ CARD ══ */
+    .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 24px; }
+    .card-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; }
+
+    /* ══ TOP ROW: Overview + Order Status ══ */
+    .top-row { display: grid; grid-template-columns: 1fr 420px; gap: 24px; align-items: start; }
+
+    /* Overview metrics */
+    .overview-metrics { display: flex; gap: 0; margin-top: 8px; }
+    .metric-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      padding: 16px 20px; border-right: 1px solid var(--border); gap: 6px;
+    }
+    .metric-item:last-child { border-right: none; }
+
+    /* Metric icon placeholder */
+    .metric-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: var(--primary);
+      background: var(--primary-lt); margin-bottom: 4px;
+      /* ASET: ganti dengan <img src="icon-profit.svg" width="44" height="44"> */
+    }
+    .metric-value {
+      font-size: 18px; font-weight: 800; font-family: var(--mono); color: var(--text-dark); text-align: center;
+    }
+    .metric-label { font-size: 12px; color: var(--text-light); font-weight: 500; text-align: center; }
+
+    /* Order Status Breakdown */
+    .order-status-list { display: flex; flex-direction: column; gap: 14px; }
+    .os-row { display: flex; flex-direction: column; gap: 5px; }
+    .os-top { display: flex; justify-content: space-between; align-items: center; }
+    .os-label { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+    .os-count { font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--text-dark); }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%; height: 7px; background: var(--border); border-radius: 100px; overflow: hidden;
+    }
+    .progress-fill { height: 100%; border-radius: 100px; transition: width .4s ease; }
+    .fill-green  { background: var(--green); }
+    .fill-amber  { background: var(--amber); }
+    .fill-blue   { background: var(--primary); }
+    .fill-grey   { background: var(--grey); }
+    .fill-red    { background: var(--red); }
+
+    /* ══ PROFIT & REVENUE CHART ══ */
+    .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .btn-outline {
+      display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 100px; border: 1.5px solid var(--border); background: var(--surface);
+      font-size: 12px; font-weight: 600; color: var(--text-mid); cursor: pointer; font-family: var(--font);
+    }
+    /* Calendar icon placeholder */
+    .cal-icon { width: 14px; height: 14px; background: var(--text-light); border-radius: 3px;
+      /* ASET: ganti dengan <img src="icon-calendar.svg"> */ }
+
+    /* Chart wrapper */
+    .chart-wrap { position: relative; height: 280px; width: 100%; }
+
+    /* Y-axis labels */
+    .y-labels {
+      position: absolute; left: 0; top: 0; bottom: 32px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 0; pointer-events: none;
+    }
+    .y-labels span { font-size: 11px; color: var(--text-light); font-family: var(--mono); }
+
+    /* SVG chart area */
+    .chart-svg-area {
+      position: absolute; left: 54px; right: 0; top: 0; bottom: 32px;
+    }
+
+    /* Tooltip */
+    .chart-tooltip {
+      position: absolute; background: var(--surface); border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(30,40,80,.14); padding: 12px 14px;
+      pointer-events: none; top: 18%; left: 48%;
+      border: 1px solid var(--border); min-width: 150px; z-index: 10;
+    }
+    .tooltip-label { font-size: 11px; color: var(--text-light); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .02em; font-weight: 600; }
+    .tooltip-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .tooltip-row:last-child { margin-bottom: 2px; }
+    .tooltip-item-label { font-size: 10px; color: var(--text-light); display: flex; align-items: center; gap: 5px; }
+    .tooltip-item-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .tooltip-value { font-size: 14px; font-weight: 800; font-family: var(--mono); color: var(--text-dark); }
+    .tooltip-month { font-size: 10px; color: var(--text-light); margin-top: 6px; text-align: center; }
+    
+    /* Active dot at cursor position */
+    .chart-dot { position: absolute; z-index: 15; pointer-events: none; }
+    .chart-dot circle { transition: r 0.1s ease; }
+    
+    /* Vertical guide line */
+    .chart-guide-line { position: absolute; width: 2px; height: 100%; background: linear-gradient(to bottom, rgba(43, 94, 232, 0.3), transparent); z-index: 5; pointer-events: none; left: 0; top: 0; }
+
+    /* X-axis labels */
+    .x-labels {
+      position: absolute; bottom: 0; left: 54px; right: 0;
+      display: flex; justify-content: space-between;
+    }
+    .x-labels span { font-size: 11px; color: var(--text-light); font-family: var(--mono); }
+
+    /* Legend */
+    .chart-legend { display: flex; justify-content: center; gap: 20px; margin-top: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text-mid); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-blue   { background: var(--primary); }
+    .dot-peach  { background: #F4C89A; }
+
+    /* ══ BEST SELLING TABLE ══ */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-size: 12px; font-weight: 600; color: var(--text-light);
+      padding: 0 0 12px; border-bottom: 1px solid var(--border); letter-spacing: .03em;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+    tbody td { padding: 14px 0; font-size: 13.5px; color: var(--text-dark); }
+    td.td-name     { font-weight: 600; }
+    td.td-id       { font-family: var(--mono); color: var(--text-mid); font-size: 13px; }
+    td.td-cat      { color: var(--text-mid); }
+    td.td-qty      { font-family: var(--mono); }
+    td.td-units    { font-family: var(--mono); }
+    td.td-revenue  { font-family: var(--mono); font-weight: 700; color: var(--primary); }
+
+    @media (max-width: 960px) {
+      .top-row { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main    { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html">
+      <img src="assets/dashboard.svg" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item" href="inventory.html">
+      <img src="assets/inventory.svg" width="20" height="20"> Inventory
+    </a>
+    <a class="nav-item active" href="reports.html">
+      <img src="assets/report.svg" width="20" height="20"> Reports
+    </a>
+    <a class="nav-item" href="suppliers.html">
+      <img src="assets/supplier.svg" width="20" height="20"> Suppliers
+    </a>
+    <a class="nav-item" href="orders.html">
+      <img src="assets/order.svg" width="20" height="20"> Orders
+    </a>
+    <a class="nav-item" href="warehouse.html">
+      <img src="assets/Warehouse.svg" width="20" height="20"> Warehouse
+    </a>
+    <a class="nav-item" href="purchase.html">
+      <img src="assets/purchase.svg" width="20" height="20"> Purchase Orders
+    </a>
+    <a class="nav-item" href="customers.html">
+      <img src="assets/customer.svg" width="20" height="20"> Customers
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- Avatar user -->
+      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- ── TOP ROW ── -->
+    <div class="top-row">
+
+      <!-- Overview Card -->
+      <div class="card">
+        <div class="card-title">Overview</div>
+        <div class="overview-metrics">
+
+          <div class="metric-item">
+            <img src="assets/Orderprofit.svg" width="44" height="44">
+            <span class="metric-value">Rp21,190</span>
+            <span class="metric-label">Total Profit</span>
+          </div>
+
+          <div class="metric-item">
+            <img src="assets/Order Revenue.svg" width="44" height="44">
+            <span class="metric-value">Rp18,300</span>
+            <span class="metric-label">Revenue</span>
+          </div>
+
+          <div class="metric-item">
+            <img src="assets/Ordersales.svg" width="44" height="44">
+            <span class="metric-value">Rp17,432</span>
+            <span class="metric-label">Sales</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Order Status Breakdown Card -->
+      <div class="card">
+        <div class="card-title">Order Status Breakdown</div>
+        <div class="order-status-list">
+
+          <div class="os-row">
+            <div class="os-top">
+              <span class="os-label">Completed</span>
+              <span class="os-count">142</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-green" style="width:90%"></div></div>
+          </div>
+
+          <div class="os-row">
+            <div class="os-top">
+              <span class="os-label">Processing</span>
+              <span class="os-count">28</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-amber" style="width:50%"></div></div>
+          </div>
+
+          <div class="os-row">
+            <div class="os-top">
+              <span class="os-label">Confirmed</span>
+              <span class="os-count">14</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-blue" style="width:30%"></div></div>
+          </div>
+
+          <div class="os-row">
+            <div class="os-top">
+              <span class="os-label">Draft</span>
+              <span class="os-count">6</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-grey" style="width:14%"></div></div>
+          </div>
+
+          <div class="os-row">
+            <div class="os-top">
+              <span class="os-label">Cancelled</span>
+              <span class="os-count">2</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-red" style="width:6%"></div></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /top-row -->
+
+    <!-- ── PROFIT & REVENUE CHART ── -->
+    <div class="card">
+      <div class="chart-header">
+        <span class="card-title" style="margin-bottom:0">Profit &amp; Revenue</span>
+        <button class="btn-outline">
+          <img src="assets/weekly.svg" width="16" height="16">
+          Weekly
+        </button>
+      </div>
+
+      <div class="chart-wrap">
+
+
+    <canvas id="revenueChart"></canvas>
+
+
+
+        <!-- X-axis labels -->
+
+      </div><!-- /chart-wrap -->
+
+      <div class="chart-legend">
+        <div class="legend-item"><span class="legend-dot dot-blue"></span> Revenue</div>
+        <div class="legend-item"><span class="legend-dot dot-peach"></span> Profit</div>
+      </div>
+    </div>
+
+    <!-- ── BEST SELLING PRODUCT TABLE ── -->
+    <div class="card">
+      <div class="card-title">Best selling product</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Product ID</th>
+            <th>Category</th>
+            <th>Remaining Quantity</th>
+            <th>Units Sold</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-name">Tomato</td>
+            <td class="td-id">23567</td>
+            <td class="td-cat">Vegetable</td>
+            <td class="td-qty">225 kg</td>
+            <td class="td-units">17</td>
+            <td class="td-revenue">Rp150,000</td>
+          </tr>
+          <tr>
+            <td class="td-name">Maggi</td>
+            <td class="td-id">10432</td>
+            <td class="td-cat">Instant Food</td>
+            <td class="td-qty">43 Packets</td>
+            <td class="td-units">30</td>
+            <td class="td-revenue">Rp129,000</td>
+          </tr>
+          <tr>
+            <td class="td-name">Red Bull</td>
+            <td class="td-id">88120</td>
+            <td class="td-cat">Beverage</td>
+            <td class="td-qty">36 Packets</td>
+            <td class="td-units">24</td>
+            <td class="td-revenue">Rp97,200</td>
+          </tr>
+          <tr>
+            <td class="td-name">Surf Excel</td>
+            <td class="td-id">55043</td>
+            <td class="td-cat">Household</td>
+            <td class="td-qty">12 Pcs</td>
+            <td class="td-units">30</td>
+            <td class="td-revenue">Rp300,000</td>
+          </tr>
+          <tr>
+            <td class="td-name">Horlicks</td>
+            <td class="td-id">33201</td>
+            <td class="td-cat">Beverage</td>
+            <td class="td-qty">5 Packets</td>
+            <td class="td-units">19</td>
+            <td class="td-revenue">Rp100,700</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div><!-- /main -->
+
+<script>
+const API = 'http://localhost:3000';
+
+async function loadOverview() {
+  const [orders, details] = await Promise.all([
+    fetch(`${API}/sales-order`).then(r => r.json()),
+    fetch(`${API}/detail-item-so`).then(r => r.json()),
+  ]);
+
+  // Total Revenue = sum total_bayar
+  const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total_bayar), 0);
+
+  // Total Sales = sum subtotal dari detail
+  const totalSales = details.reduce((sum, d) => sum + Number(d.subtotal), 0);
+
+  // Total Profit = Revenue - Sales (harga jual - harga beli)
+  const totalProfit = totalRevenue - totalSales;
+
+  // Update UI
+  const metrics = document.querySelectorAll('.metric-value');
+  metrics[0].textContent = 'Rp' + totalProfit.toLocaleString('id-ID');
+  metrics[1].textContent = 'Rp' + totalRevenue.toLocaleString('id-ID');
+  metrics[2].textContent = 'Rp' + totalSales.toLocaleString('id-ID');
+}
+
+loadOverview();
+
+async function loadOrderStatus() {
+  const orders = await fetch(`${API}/sales-order`).then(r => r.json());
+
+  // Count per status
+  const statusCount = {};
+  orders.forEach(o => {
+    statusCount[o.status_so] = (statusCount[o.status_so] || 0) + 1;
+  });
+
+  const total = orders.length;
+
+  const statusMap = [
+    { label: 'Completed', key: 'Delivered',  fillClass: 'fill-green' },
+    { label: 'Processing', key: 'Processing', fillClass: 'fill-amber' },
+    { label: 'Confirmed',  key: 'Confirmed',  fillClass: 'fill-blue'  },
+    { label: 'Draft',      key: 'Draft',      fillClass: 'fill-grey'  },
+    { label: 'Cancelled',  key: 'Cancelled',  fillClass: 'fill-red'   },
+  ];
+
+  const rows = document.querySelectorAll('.os-row');
+  statusMap.forEach((s, i) => {
+    const count = statusCount[s.key] || 0;
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    rows[i].querySelector('.os-count').textContent = count;
+    rows[i].querySelector('.progress-fill').style.width = pct + '%';
+  });
+}
+
+loadOrderStatus();
+
+async function loadBestSelling() {
+  const [details, produk, kategori] = await Promise.all([
+    fetch(`${API}/detail-item-so`).then(r => r.json()),
+    fetch(`${API}/produk`).then(r => r.json()),
+    fetch(`${API}/kategori`).then(r => r.json()),
+  ]);
+
+  // Map produk & kategori by id
+  const produkMap = {};
+  produk.forEach(p => produkMap[p.id_produk] = p);
+
+  const kategoriMap = {};
+  kategori.forEach(k => kategoriMap[k.id_kategori] = k.nama_kategori);
+
+  // Sum qty & revenue per produk
+  const soldMap = {};
+  details.forEach(d => {
+    if (!soldMap[d.id_produk]) soldMap[d.id_produk] = { qty: 0, revenue: 0 };
+    soldMap[d.id_produk].qty += d.qty;
+    soldMap[d.id_produk].revenue += Number(d.subtotal);
+  });
+
+  // Sort by qty terjual
+  const sorted = Object.entries(soldMap)
+    .sort((a, b) => b[1].qty - a[1].qty)
+    .slice(0, 5);
+
+  const tbody = document.querySelector('tbody');
+  tbody.innerHTML = '';
+
+  sorted.forEach(([id_produk, data]) => {
+    const p = produkMap[id_produk];
+    if (!p) return;
+    const namaKategori = kategoriMap[p.id_kategori] || '-';
+
+    tbody.innerHTML += `
+      <tr>
+        <td class="td-name">${p.nama_produk}</td>
+        <td class="td-id">${p.id_produk}</td>
+        <td class="td-cat">${namaKategori}</td>
+        <td class="td-qty">${p.stok_total} Packets</td>
+        <td class="td-units">${data.qty}</td>
+        <td class="td-revenue">Rp${data.revenue.toLocaleString('id-ID')}</td>
+      </tr>
+    `;
+  });
+}
+
+loadBestSelling();
+
+async function loadChart() {
+  const data = await fetch(`${API}/sales-order/monthly-summary`).then(r => r.json());
+
+  const labels  = data.map(d => d.month + ' ' + d.year);
+  const revenue = data.map(d => Number(d.revenue));
+  const profit  = data.map(d => Number(d.profit));
+
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Revenue',
+          data: revenue,
+          borderColor: '#2B5EE8',
+          backgroundColor: 'rgba(43,94,232,0.08)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+        },
+        {
+          label: 'Profit',
+          data: profit,
+          borderColor: '#F4C89A',
+          backgroundColor: 'rgba(244,200,154,0.15)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: '#E8ECF4' }, ticks: { color: '#9AA3B8', font: { family: 'DM Mono' } } },
+        x: { grid: { display: false }, ticks: { color: '#9AA3B8', font: { family: 'DM Mono' } } }
+      }
+    }
+  });
+}
+
+loadChart();
+</script>
+
+</body>
+</html>

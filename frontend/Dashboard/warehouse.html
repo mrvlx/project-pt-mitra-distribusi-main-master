@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi — Warehouse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #F4F6FB;
+      --surface:    #FFFFFF;
+      --card-bg:    #F8F9FC;
+      --primary:    #2B5EE8;
+      --primary-lt: #EEF2FD;
+      --amber:      #D97706;
+      --green:      #16A34A;
+      --red:        #DC2626;
+      --text-dark:  #1A1D2E;
+      --text-mid:   #5A607A;
+      --text-light: #9AA3B8;
+      --border:     #E8ECF4;
+      --shadow:     0 2px 16px rgba(30,40,80,.08);
+      --radius:     16px;
+      --radius-sm:  10px;
+      --sidebar-w:  220px;
+      --font:       'Plus Jakarta Sans', sans-serif;
+      --mono:       'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 100; padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 20px 16px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child {
+      font-size: 10px; font-weight: 500; color: var(--text-light);
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .logo-text span:last-child { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; color: var(--text-mid); font-weight: 500;
+      font-size: 13.5px; text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover  { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); }
+    .nav-icon {
+      width: 20px; height: 20px; border-radius: 5px;
+      background: currentColor; opacity: .18; flex-shrink: 0;
+      /* ASET: ganti dengan <img src="icon-xxx.svg" width="20" height="20"> */
+    }
+    .nav-item.active .nav-icon { opacity: 1; background: var(--primary); }
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+
+    /* ══ TOP HEADER ══ */
+    .header {
+      height: 64px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 28px; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .search-bar {
+      flex: 1; max-width: 400px;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 100px; padding: 8px 16px;
+      color: var(--text-light); font-size: 13px;
+    }
+    .search-icon {
+      width: 16px; height: 16px; background: var(--text-light);
+      border-radius: 50%; flex-shrink: 0;
+      /* ASET: ganti dengan <img src="icon-search.svg"> */
+    }
+    .search-bar input {
+      border: none; background: transparent; outline: none;
+      color: var(--text-dark); font-family: var(--font); font-size: 13px; width: 100%;
+    }
+    .search-bar input::placeholder { color: var(--text-light); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .notif-btn {
+      width: 36px; height: 36px; background: var(--bg);
+      border: 1.5px solid var(--border); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative;
+    }
+    .bell-icon {
+      width: 16px; height: 16px; background: var(--text-mid); border-radius: 4px;
+      /* ASET: ganti dengan <img src="icon-bell.svg"> */
+    }
+    .notif-dot {
+      width: 8px; height: 8px; background: var(--red); border-radius: 50%;
+      border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--primary); display: flex; align-items: center;
+      justify-content: center; color: #fff; font-weight: 700;
+      font-size: 13px; cursor: pointer; overflow: hidden;
+      /* ASET: ganti dengan <img src="avatar.jpg" width="36" height="36"> */
+    }
+
+    /* ══ CONTENT ══ */
+    .content { padding: 28px; display: flex; flex-direction: column; gap: 24px; }
+
+    /* Page title + action */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .page-title { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+    .btn-primary {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 18px; background: var(--primary); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 13.5px; font-weight: 700;
+      cursor: pointer; transition: background .15s; white-space: nowrap;
+    }
+    .btn-primary:hover { background: #1F4DC5; }
+
+    /* ══ WAREHOUSE GRID ══ */
+    .warehouse-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    /* ══ WAREHOUSE CARD ══ */
+    .wh-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* Card top section */
+    .wh-card-top {
+      background: var(--card-bg);
+      padding: 20px 22px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .wh-name {
+      font-size: 18px; font-weight: 800;
+      color: var(--text-dark); margin-bottom: 10px;
+    }
+    .wh-meta {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .wh-meta-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-mid);
+    }
+    /* Location & Person icon placeholders */
+    .meta-icon {
+      width: 16px; height: 16px; border-radius: 4px;
+      background: var(--text-light); opacity: .6; flex-shrink: 0;
+      /* ASET: ganti dengan <img src="icon-location.svg"> atau <img src="icon-person.svg"> */
+    }
+    .wh-meta-row strong { color: var(--text-dark); font-weight: 700; }
+
+    /* Card bottom section */
+    .wh-card-body { padding: 20px 22px 22px; }
+
+    /* Stock row */
+    .wh-stats {
+      display: flex; gap: 32px; margin-bottom: 20px;
+    }
+    .wh-stat label {
+      display: block; font-size: 11.5px; font-weight: 600;
+      color: var(--text-light); margin-bottom: 4px; letter-spacing: .03em;
+    }
+    .wh-stat .stat-val-blue {
+      font-size: 18px; font-weight: 800;
+      font-family: var(--mono); color: var(--primary);
+    }
+    .wh-stat .stat-val-dark {
+      font-size: 18px; font-weight: 800;
+      font-family: var(--mono); color: var(--text-dark);
+    }
+
+    /* Capacity Utilization */
+    .capacity-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .capacity-label {
+      font-size: 13px; font-weight: 700; color: var(--text-dark);
+    }
+    .capacity-pct {
+      font-size: 14px; font-weight: 800; font-family: var(--mono);
+    }
+    .pct-amber  { color: var(--amber); }
+    .pct-green  { color: var(--green); }
+    .pct-red    { color: var(--red);   }
+    .pct-blue   { color: var(--primary); }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%; height: 10px; background: var(--border);
+      border-radius: 100px; overflow: hidden; margin-bottom: 14px;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 100px;
+      transition: width .4s ease;
+    }
+    .fill-amber { background: var(--amber); }
+    .fill-green { background: var(--green); }
+    .fill-red   { background: var(--red);   }
+    .fill-blue  { background: var(--primary); }
+
+    /* Capacity metrics row */
+    .capacity-metrics {
+      display: flex; gap: 0;
+    }
+    .cap-metric {
+      flex: 1;
+    }
+    .cap-metric label {
+      display: block; font-size: 11px; font-weight: 500;
+      color: var(--text-light); margin-bottom: 3px;
+    }
+    .cap-metric .cap-val {
+      font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--text-dark);
+    }
+    .cap-metric .cap-val.available { color: var(--green); }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 960px) {
+      .warehouse-grid { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main    { margin-left: 0; }
+      .content { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html">
+      <img src="assets/dashboard.svg" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item" href="inventory.html">
+      <img src="assets/inventory.svg" width="20" height="20"> Inventory
+    </a>
+    <a class="nav-item" href="reports.html">
+      <img src="assets/report.svg" width="20" height="20"> Reports
+    </a>
+    <a class="nav-item" href="suppliers.html">
+      <img src="assets/supplier.svg" width="20" height="20"> Suppliers
+    </a>
+    <a class="nav-item" href="orders.html">
+      <img src="assets/order.svg" width="20" height="20"> Orders
+    </a>
+    <a class="nav-item active" href="warehouse.html">
+      <img src="assets/Warehouse.svg" width="20" height="20"> Warehouse
+    </a>
+    <a class="nav-item" href="purchase.html">
+      <img src="assets/purchase.svg" width="20" height="20"> Purchase Orders
+    </a>
+    <a class="nav-item" href="customers.html">
+      <img src="assets/customer.svg" width="20" height="20"> Customers
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Top Header -->
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+
+    <div class="header-right">
+      <!-- Notifikasi -->
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- Avatar user -->
+      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Warehouse</h1>
+      <button class="btn-primary">+ Add Warehouse</button>
+    </div>
+
+    <!-- ══ Warehouse Cards Grid ══ -->
+    <div class="warehouse-grid">
+
+      <!-- ── Card 1: Jakarta Central ── -->
+      <div class="wh-card">
+        <div class="wh-card-top">
+          <div class="wh-name">Jakarta Central</div>
+          <div class="wh-meta">
+            <div class="wh-meta-row">
+              <img src="assets/warehousealamat.svg" width="16" height="16">
+              Jl. Sudirman No. 45, Jakarta Pusat
+            </div>
+            <div class="wh-meta-row">
+              <img src="assets/manager.svg" width="16" height="16">
+              Manager: <strong>Budi Santoso</strong>
+            </div>
+          </div>
+        </div>
+        <div class="wh-card-body">
+          <div class="wh-stats">
+            <div class="wh-stat">
+              <label>Stock Value</label>
+              <span class="stat-val-blue">Rp 4.25B</span>
+            </div>
+            <div class="wh-stat">
+              <label>Products</label>
+              <span class="stat-val-dark">1.450 items</span>
+            </div>
+          </div>
+          <div class="capacity-header">
+            <span class="capacity-label">Capacity Utilization</span>
+            <span class="capacity-pct pct-amber">78.5%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill fill-amber" style="width: 78.5%"></div>
+          </div>
+          <div class="capacity-metrics">
+            <div class="cap-metric">
+              <label>Total</label>
+              <span class="cap-val">10.000 </span>
+            </div>
+            <div class="cap-metric">
+              <label>Used</label>
+              <span class="cap-val">7.850</span>
+            </div>
+            <div class="cap-metric">
+              <label>Available</label>
+              <span class="cap-val available">2.150</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Card 2: Surabaya Branch ── -->
+      <div class="wh-card">
+        <div class="wh-card-top">
+          <div class="wh-name">Surabaya Branch</div>
+          <div class="wh-meta">
+            <div class="wh-meta-row">
+              <img src="assets/warehousealamat.svg" width="16" height="16">
+              Jl. Ahmad Yani No. 123, Surabaya
+            </div>
+            <div class="wh-meta-row">
+              <img src="assets/manager.svg" width="16" height="16">
+              Manager: <strong>Siti Rahayu</strong>
+            </div>
+          </div>
+        </div>
+        <div class="wh-card-body">
+          <div class="wh-stats">
+            <div class="wh-stat">
+              <label>Stock Value</label>
+              <span class="stat-val-blue">Rp 2.89B</span>
+            </div>
+            <div class="wh-stat">
+              <label>Products</label>
+              <span class="stat-val-dark">980 items</span>
+            </div>
+          </div>
+          <div class="capacity-header">
+            <span class="capacity-label">Capacity Utilization</span>
+            <span class="capacity-pct pct-amber">65.0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill fill-amber" style="width: 65%"></div>
+          </div>
+          <div class="capacity-metrics">
+            <div class="cap-metric">
+              <label>Total</label>
+              <span class="cap-val">8.000</span>
+            </div>
+            <div class="cap-metric">
+              <label>Used</label>
+              <span class="cap-val">5.200</span>
+            </div>
+            <div class="cap-metric">
+              <label>Available</label>
+              <span class="cap-val available">2.800</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Card 3: Bandung Hub ── -->
+      <div class="wh-card">
+        <div class="wh-card-top">
+          <div class="wh-name">Surabaya Hub</div>
+          <div class="wh-meta">
+            <div class="wh-meta-row">
+              <img src="assets/warehousealamat.svg" width="16" height="16">
+              Jl. Diponegoro No. 8, Surabaya
+            </div>
+            <div class="wh-meta-row">
+              <img src="assets/manager.svg" width="16" height="16">
+              Manager: <strong>Agus Wibowo</strong>
+            </div>
+          </div>
+        </div>
+        <div class="wh-card-body">
+          <div class="wh-stats">
+            <div class="wh-stat">
+              <label>Stock Value</label>
+              <span class="stat-val-blue">Rp 1.62B</span>
+            </div>
+            <div class="wh-stat">
+              <label>Products</label>
+              <span class="stat-val-dark">670 items</span>
+            </div>
+          </div>
+          <div class="capacity-header">
+            <span class="capacity-label">Capacity Utilization</span>
+            <span class="capacity-pct pct-green">42.0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill fill-green" style="width: 42%"></div>
+          </div>
+          <div class="capacity-metrics">
+            <div class="cap-metric">
+              <label>Total</label>
+              <span class="cap-val">6.000 </span>
+            </div>
+            <div class="cap-metric">
+              <label>Used</label>
+              <span class="cap-val">2.520</span>
+            </div>
+            <div class="cap-metric">
+              <label>Available</label>
+              <span class="cap-val available">3.480 </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Card 4: Medan Depot ── -->
+      <div class="wh-card">
+        <div class="wh-card-top">
+          <div class="wh-name">Jakarta Depot</div>
+          <div class="wh-meta">
+            <div class="wh-meta-row">
+              <img src="assets/warehousealamat.svg" width="16" height="16">
+              Jl. Gatot Subroto No. 77, Jakarta
+            </div>
+            <div class="wh-meta-row">
+              <img src="assets/manager.svg" width="16" height="16">
+              Manager: <strong>Rizky Pratama</strong>
+            </div>
+          </div>
+        </div>
+        <div class="wh-card-body">
+          <div class="wh-stats">
+            <div class="wh-stat">
+              <label>Stock Value</label>
+              <span class="stat-val-blue">Rp 3.10B</span>
+            </div>
+            <div class="wh-stat">
+              <label>Products</label>
+              <span class="stat-val-dark">1.120 items</span>
+            </div>
+          </div>
+          <div class="capacity-header">
+            <span class="capacity-label">Capacity Utilization</span>
+            <span class="capacity-pct pct-red">91.3%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill fill-red" style="width: 91.3%"></div>
+          </div>
+          <div class="capacity-metrics">
+            <div class="cap-metric">
+              <label>Total</label>
+              <span class="cap-val">9.500 </span>
+            </div>
+            <div class="cap-metric">
+              <label>Used</label>
+              <span class="cap-val">8.674</span>
+            </div>
+            <div class="cap-metric">
+              <label>Available</label>
+              <span class="cap-val available">826</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /warehouse-grid -->
+  </main>
+</div>
+<script>
+const API = 'http://localhost:3000';
+
+async function loadWarehouse() {
+  const [gudang, produk] = await Promise.all([
+    fetch(`${API}/gudang`).then(r => r.json()),
+    fetch(`${API}/produk`).then(r => r.json()),
+  ]);
+
+  // Count produk per gudang dari sales_order
+  const produkPerGudang = {};
+  gudang.forEach(g => produkPerGudang[g.id_gudang] = 0);
+  produk.forEach(p => {
+    // semua produk dihitung, bagi rata per gudang
+  });
+
+  const grid = document.querySelector('.warehouse-grid');
+  grid.innerHTML = '';
+
+  gudang.forEach(g => {
+    const pct = g.kapasitas_total > 0
+      ? ((g.kapasitas_terpakai / g.kapasitas_total) * 100).toFixed(1)
+      : 0;
+
+    const pctColor = pct >= 80 ? 'pct-red' : pct >= 60 ? 'pct-amber' : 'pct-green';
+    const fillColor = pct >= 80 ? 'fill-red' : pct >= 60 ? 'fill-amber' : 'fill-green';
+    const available = g.kapasitas_total - g.kapasitas_terpakai;
+
+    grid.innerHTML += `
+      <div class="wh-card">
+        <div class="wh-card-top">
+          <div class="wh-name">${g.nama_gudang}</div>
+          <div class="wh-meta">
+            <div class="wh-meta-row">
+              <img src="assets/warehousealamat.svg" width="16" height="16">
+              ${g.lokasi}
+            </div>
+            <div class="wh-meta-row">
+              <img src="assets/manager.svg" width="16" height="16">
+              Manager: <strong>${g.manager || '-'}</strong>
+            </div>
+          </div>
+        </div>
+        <div class="wh-card-body">
+          <div class="wh-stats">
+            <div class="wh-stat">
+              <label>Kapasitas Total</label>
+              <span class="stat-val-blue">${g.kapasitas_total.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="wh-stat">
+              <label>Terpakai</label>
+              <span class="stat-val-dark">${g.kapasitas_terpakai.toLocaleString('id-ID')}</span>
+            </div>
+          </div>
+          <div class="capacity-header">
+            <span class="capacity-label">Capacity Utilization</span>
+            <span class="capacity-pct ${pctColor}">${pct}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill ${fillColor}" style="width:${pct}%"></div>
+          </div>
+          <div class="capacity-metrics">
+            <div class="cap-metric">
+              <label>Total</label>
+              <span class="cap-val">${g.kapasitas_total.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="cap-metric">
+              <label>Used</label>
+              <span class="cap-val">${g.kapasitas_terpakai.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="cap-metric">
+              <label>Available</label>
+              <span class="cap-val available">${available.toLocaleString('id-ID')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+loadWarehouse();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi — Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --primary:   #2B5EE8;
+      --primary-lt:#EEF2FD;
+      --green:     #2ECC7F;
+      --green-lt:  #E5F9F0;
+      --red:       #E84B3A;
+      --red-lt:    #FDECEA;
+      --amber:     #F4A93C;
+      --amber-lt:  #FEF4E3;
+      --purple:    #9B6EE8;
+      --purple-lt: #F2EDFD;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; font-size: 14px; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 100; padding: 0 0 24px;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 20px 16px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .logo-text { 
+      display: flex; 
+      flex-direction: column; 
+      line-height: 1.2; }
+    .logo-text span:first-child { 
+      font-size: 10px; 
+      font-weight: 500; 
+      color: var(--text-light); 
+      letter-spacing:.04em; 
+      text-transform:uppercase; }
+    .logo-text span:last-child  
+    { font-size: 13px; 
+      font-weight: 700; 
+      color: var(--text-dark); }
+
+    .sidebar-nav { flex:1; padding: 16px 12px; display:flex; flex-direction:column; gap:2px; }
+    .nav-item {
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      cursor:pointer; color: var(--text-mid); font-weight:500;
+      font-size:13.5px; text-decoration:none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); }
+    .nav-icon {
+      width:20px; height:20px; border-radius:5px;
+      flex-shrink:0;
+    }
+    .nav-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .nav-item.active .nav-icon { opacity:1; background: var(--primary); }
+
+    .sidebar-footer { padding: 0 12px; display:flex; flex-direction:column; gap:2px; }
+
+    /* ── Main ── */
+    .main { margin-left: var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+
+    /* ── Header ── */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; padding: 0 28px; gap:16px;
+      position: sticky; top:0; z-index:50;
+    }
+    .search-bar {
+      flex:1; max-width:400px; display:flex; align-items:center; gap:8px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:100px; padding: 8px 16px; font-size:13px; color: var(--text-light);
+    }
+    .search-icon { width:16px; height:16px; border-radius:50%; flex-shrink:0; }
+    .search-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .search-bar input { border:none; background:transparent; outline:none; color: var(--text-dark); font-family: var(--font); font-size:13px; width:100%; }
+    .search-bar input::placeholder { color: var(--text-light); }
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+    .notif-btn {
+      width:36px; height:36px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    }
+    .bell-icon { width:16px; height:16px; border-radius:4px; }
+    .bell-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
+    .avatar {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; overflow: hidden;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── Content ── */
+    .content { padding: 28px; display:flex; flex-direction:column; gap:24px; }
+
+    /* ── Card ── */
+    .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 24px; }
+    .card-title { font-size:16px; font-weight:700; color: var(--text-dark); margin-bottom:20px; }
+
+    /* ── Overall Inventory ── */
+    .overview-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:0; }
+    .ov-col { padding: 0 24px 0 0; border-right: 1px solid var(--border); margin-right:24px; }
+    .ov-col:last-child { border-right:none; margin-right:0; }
+    .ov-label { font-size:13px; font-weight:700; margin-bottom:12px; }
+    .ov-label.blue   { color: var(--primary); }
+    .ov-label.purple { color: var(--purple); }
+    .ov-label.amber  { color: var(--amber); }
+    .ov-label.red    { color: var(--red); }
+
+    .ov-row { display:flex; gap:32px; margin-bottom:6px; }
+    .ov-val { font-size:22px; font-weight:800; font-family: var(--mono); color: var(--text-dark); }
+    .ov-sub { font-size:13px; font-weight:700; font-family: var(--mono); color: var(--text-dark); }
+    .ov-desc { font-size:11px; color: var(--text-light); margin-top:2px; }
+    .ov-desc-pair { display:flex; gap:32px; }
+
+    /* ── Products Table ── */
+    .table-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .table-actions { display:flex; gap:10px; }
+
+    .btn-primary {
+      padding: 10px 20px; background: var(--primary); color:#fff;
+      border:none; border-radius: var(--radius-sm); font-family: var(--font);
+      font-size:13px; font-weight:700; cursor:pointer; transition: background .15s;
+    }
+    .btn-primary:hover { background: #1F4DC5; }
+
+    table { width:100%; border-collapse:collapse; }
+    thead th {
+      text-align:left; font-size:12px; font-weight:600; color: var(--text-light);
+      padding: 0 0 12px; border-bottom: 1px solid var(--border); letter-spacing:.03em;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background: var(--bg); }
+    tbody td { padding: 14px 0; font-size:13.5px; color: var(--text-dark); }
+    td.td-name   { font-weight:600; }
+    td.td-price  { font-family: var(--mono); }
+    td.td-stock  { font-family: var(--mono); color: var(--text-mid); }
+    td.td-date   { font-family: var(--mono); color: var(--text-mid); font-size:12px; }
+
+    .badge {
+      display:inline-block; padding: 3px 10px;
+      border-radius:100px; font-size:12px; font-weight:700;
+    }
+    .badge-in    { background: var(--green-lt); color: var(--green); }
+    .badge-out   { background: var(--red-lt);   color: var(--red);   }
+    .badge-low   { background: var(--amber-lt); color: var(--amber); }
+
+    /* ── Stock Movement Log ── */
+    .log-table thead th { font-size:12px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html">
+      <img src="assets/dashboard.svg" width="20" height="20"> Dashboard
+    </a>
+    <a class="nav-item active" href="inventory.html">
+      <img src="assets/inventory.svg" width="20" height="20"> Inventory
+    </a>
+    <a class="nav-item" href="reports.html">
+      <img src="assets/report.svg" width="20" height="20"> Reports
+    </a>
+    <a class="nav-item" href="suppliers.html">
+      <img src="assets/supplier.svg" width="20" height="20"> Suppliers
+    </a>
+    <a class="nav-item" href="orders.html">
+      <img src="assets/order.svg" width="20" height="20"> Orders
+    </a>
+    <a class="nav-item" href="warehouse.html">
+      <img src="assets/Warehouse.svg" width="20" height="20"> Warehouse
+    </a>
+    <a class="nav-item" href="purchase.html">
+      <img src="assets/purchase.svg" width="20" height="20"> Purchase Orders
+    </a>
+    <a class="nav-item" href="customers.html">
+      <img src="assets/customer.svg" width="20" height="20"> Customers
+    </a>
+
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="settings.html">
+      <img src="assets/setting.svg" width="20" height="20"> Settings
+    </a>
+    <a class="nav-item" href="auth.html">
+      <img src="assets/logout.svg" width="20" height="20"> Log Out
+    </a>
+  </div>
+</aside>
+
+<div class="main">
+
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+    <div class="header-right">
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
+    </div>
+  </header>
+
+  <main class="content">
+
+    <div class="card">
+      <div class="card-title">Overall Inventory</div>
+      <div class="overview-grid">
+
+        <div class="ov-col">
+          <div class="ov-label blue">Categories</div>
+          <div class="ov-val" id="total-kategori">0</div>
+          <div class="ov-desc">Last 7 days</div>
+        </div>
+
+        <div class="ov-col">
+          <div class="ov-label purple">Total Product</div>
+          <div class="ov-row">
+            <div>
+              <div class="ov-val" id="total-produk">0</div>
+              <div class="ov-desc">Last 7 days</div>
+            </div>
+            <div>
+              <div class="ov-sub">Rp25000</div>
+              <div class="ov-desc">Revenue</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ov-col">
+          <div class="ov-label amber">Low Stock</div>
+          <div class="ov-row">
+            <div>
+              <div class="ov-val" id="low-stock">0</div>
+              <div class="ov-desc">Last 7 days</div>
+            </div>
+            <div>
+              <div class="ov-sub">Rp2500</div>
+              <div class="ov-desc">Cost</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ov-col">
+          <div class="ov-label red">Out of Stock</div>
+          <div class="ov-row">
+            <div>
+              <div class="ov-val" id="out-of-stock">0</div>
+              <div class="ov-desc">Ordered</div>
+            </div>
+            <div>
+              <div class="ov-val">2</div>
+              <div class="ov-desc">Not in stock</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-header">
+        <span class="card-title" style="margin-bottom:0">Products</span>
+        <div class="table-actions">
+         <button class="btn-primary" onclick="window.location.href='add-product.html'">+ Add Product</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Products</th>
+            <th>Buying Price</th>
+            <th>Jakarta Stock</th>
+            <th>Surabaya Stock</th>
+            <th>Total Stock</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-body">
+          </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Stock Movement Log</div>
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Products</th>
+            <th>Warehouse</th>
+            <th>Movement Type</th>
+            <th>Quantity</th>
+            <th>TimeStamp</th>
+            <th>Reference</th>
+          </tr>
+        </thead>
+        <tbody id="log-body">
+          </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const API = 'http://localhost:3000';
+
+async function loadData() {
+  try {
+    // 1. Summary
+    const summary = await fetch(`${API}/produk/summary`).then(r => r.json());
+    document.getElementById('total-kategori').innerText = summary.total_kategori || 0;
+    document.getElementById('total-produk').innerText = summary.total_produk || 0;
+    document.getElementById('low-stock').innerText = summary.low_stock || 0;
+    document.getElementById('out-of-stock').innerText = summary.out_of_stock || 0;
+
+    // Stats: Revenue, Cost, Not in Stock
+    const stats = await fetch(`${API}/produk/stats`).then(r => r.json());
+
+    // Update Revenue di Total Product
+    document.querySelector('#total-produk').closest('.ov-col').querySelector('.ov-sub').textContent = 
+      'Rp' + Number(stats.revenue_7days).toLocaleString('id-ID');
+
+    // Update Cost di Low Stock  
+    document.querySelector('#low-stock').closest('.ov-col').querySelector('.ov-sub').textContent = 
+      'Rp' + Number(stats.cost_7days).toLocaleString('id-ID');
+
+    // Update Not in Stock
+    document.querySelector('#out-of-stock').closest('.ov-col').querySelectorAll('.ov-val')[1].textContent = 
+      stats.not_in_stock;
+
+    // 2. Produk table - pake endpoint stok-gudang
+    const produk = await fetch(`${API}/produk/stok-gudang`).then(r => r.json());
+    document.getElementById('inventory-body').innerHTML = produk.map(p => `
+      <tr>
+        <td class="td-name">${p.nama_produk}</td>
+        <td class="td-price">Rp${Number(p.harga_beli).toLocaleString('id-ID')}</td>
+        <td class="td-stock">${p.stok_jakarta} Packets</td>
+        <td class="td-stock">${p.stok_surabaya} Packets</td>
+        <td class="td-stock">${p.stok_total}</td>
+        <td><span class="badge ${p.stok_total < 1 ? 'badge-out' : (p.stok_total < 10 ? 'badge-low' : 'badge-in')}">
+          ${p.stok_total < 1 ? 'Out of stock' : (p.stok_total < 10 ? 'Low Stock' : 'In-stock')}
+        </span></td>
+      </tr>
+    `).join('');
+
+    // 3. Stock Movement Log
+    const logs = await fetch(`${API}/pergerakan-stok`).then(r => r.json());
+    document.getElementById('log-body').innerHTML = logs.map(l => {
+      const tanggal = new Date(l.waktu_log).toLocaleDateString('id-ID');
+      const ref = l.id_so ? `SO-${l.id_so}` : (l.id_po ? `PO-${l.id_po}` : '-');
+      return `
+        <tr>
+          <td class="td-name">${l.nama_produk}</td>
+          <td class="td-price">${l.nama_gudang}</td>
+          <td class="td-stock"><span class="badge ${l.jenis_pergerakan === 'Masuk' ? 'badge-in' : 'badge-out'}">${l.jenis_pergerakan}</span></td>
+          <td class="td-stock">${l.jumlah} Packets</td>
+          <td class="td-date">${tanggal}</td>
+          <td>${ref}</td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error("Gagal mengambil data:", err);
+  }
+}
+
+loadData();
+</script>
+
+</body>
+</html>
