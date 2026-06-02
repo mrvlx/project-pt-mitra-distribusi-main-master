@@ -118,3 +118,27 @@ exports.deletePurchaseOrder = (req, res) => {
         res.json({ message: 'Purchase order berhasil dihapus' });
     });
 };
+
+exports.getPurchaseOrderItems = (req, res) => {
+    const { id } = req.params;
+
+    const sql = `
+        SELECT 
+            d.id_po,
+            p.nama_produk,
+            d.qty AS jumlah,
+            d.harga_beli AS harga_satuan,
+            d.subtotal
+        FROM detail_item_po d
+        JOIN produk p ON d.id_produk = p.id_produk
+        WHERE d.id_po = ?
+    `;
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error("Error Detail PO:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(result); 
+    });
+};

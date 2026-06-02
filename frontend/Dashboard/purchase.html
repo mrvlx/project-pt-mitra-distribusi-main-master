@@ -293,6 +293,31 @@
       .content { padding: 16px; }
       .reorder-grid { grid-template-columns: repeat(2, 1fr); }
     }
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .btn-action:hover {
+    background-color: #EEF2FD;
+    border-color: #2B5EE8;
+  }
+    .close-modal-btn {
+    transition: color 0.2s, transform 0.2s;
+    padding: 0 5px; /* Supaya area klik tidak terlalu sempit */
+  }
+
+  .close-modal-btn:hover {
+    color: #EF4444; /* Berubah jadi merah saat diarahkan mouse */
+    transform: scale(1.1); /* Sedikit membesar saat hover */
+  }
   </style>
 </head>
 <body>
@@ -471,9 +496,12 @@
                 </span>
               </td>
               <td>
-                <button class="action-btn" title="View detail">
-                  <img src="assets/Action.svg" width="30" height="30">
-                </button>
+            <button class="btn-action" title="View detail" onclick="openDetailModal('${po.id_po}', '${po.po_number}', '${po.supplier_name}')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
               </td>
             </tr>
 
@@ -659,6 +687,39 @@
     </div><!-- /main-card -->
   </main>
 </div>
+
+<!-- ══ MODAL DETAIL PURCHASE ORDER ══ -->
+<div id="detailModal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <!-- Header Modal -->
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; border-bottom: 1px solid #E2E8F0;">
+      
+      <div>
+        <h3 id="modalPoNumber" style="margin: 0; color: #1E293B; font-size: 18px;">PO-XXXX-XXXX</h3>
+        <p id="modalSupplier" style="margin: 4px 0 0 0; color: #64748B; font-size: 13px;">Supplier: -</p>
+      </div>
+
+      <button class="close-modal-btn" onclick="closeDetailModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748B;">&times;</button>
+      
+    </div>
+
+    <!-- Body Modal (Tabel Detail Item) -->
+    <div class="modal-body">
+      <table class="modal-table">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th style="text-align: center;">Qty Ordered</th>
+            <th style="text-align: right;">Unit Price</th>
+            <th style="text-align: right;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="modalTableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 <script>
 const API = 'http://localhost:3000';
 
@@ -706,6 +767,10 @@ async function loadPurchaseOrders() {
 
   pos.forEach((po, i) => {
     const sup = pemasokMap[po.id_pemasok];
+    
+    // 1. KITA PRE-COMPUTE NAMA SUPPLIER DI SINI SUPAYA BERSIH
+    const supplierName = sup ? sup.nama_pemasok : '-'; 
+    
     const namaGudang = gudangMap[po.id_gudang] || '-';
     const tanggal = new Date(po.tanggal_po).toLocaleDateString('id-ID');
     const items = detailCount[po.id_po] || 0;
@@ -717,7 +782,7 @@ async function loadPurchaseOrders() {
       <tr>
         <td class="td-po">${poNumber}</td>
         <td>
-          <div class="td-supplier-name">${sup ? sup.nama_pemasok : '-'}</div>
+          <div class="td-supplier-name">${supplierName}</div>
           <div class="td-sup-code">SUP-${String(po.id_pemasok).padStart(3, '0')}</div>
         </td>
         <td class="td-warehouse td-center">${namaGudang}</td>
@@ -728,7 +793,7 @@ async function loadPurchaseOrders() {
           <span class="badge ${badge}">${label}</span>
         </td>
         <td>
-          <button class="action-btn" title="View detail">
+          <button class="action-btn" title="View detail" onclick="openDetailModal(${po.id_po}, '${poNumber}', '${supplierName}')">
             <img src="assets/Action.svg" width="30" height="30">
           </button>
         </td>
@@ -736,8 +801,8 @@ async function loadPurchaseOrders() {
     `;
   });
 }
-
 loadPurchaseOrders();
+
 async function loadLowStock() {
   const produk = await fetch(`${API}/produk`).then(r => r.json());
 
@@ -771,6 +836,73 @@ function logout() {
   localStorage.clear();
   window.location.href = 'auth.html';
 }
+
+// ══ LOGIKA MODAL POP-UP DETAIL PO ══
+async function openDetailModal(idPo, poNumber, supplierName) {
+  // 1. Set Info di Header Modal
+  document.getElementById('modalPoNumber').innerText = `Detail ${poNumber}`;
+  document.getElementById('modalSupplier').innerText = `Supplier: ${supplierName}`;
+
+  // 2. Tampilkan efek loading
+  const tableBody = document.getElementById('modalTableBody');
+  tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-mid);">Memuat data item...</td></tr>`;
+
+  let totalQty = 0;
+  let grandTotal = 0;
+
+  try {
+    // 3. Tembak API Router
+    const response = await fetch(`${API}/purchase-order/${idPo}/items`);
+    if (!response.ok) throw new Error('Gagal memuat data dari server');
+
+    const items = await response.json();
+    tableBody.innerHTML = ''; 
+
+    // 4. Looping item barang dan masukkan ke tabel modal
+    if (items.length > 0) {
+      items.forEach(item => {
+          // Pastikan nilai dikonversi menjadi angka (Number) sebelum dijumlahkan
+          const jumlah = Number(item.jumlah) || 0;
+          const subtotal = Number(item.subtotal) || 0;
+
+          totalQty += jumlah;
+          grandTotal += subtotal; // Sekarang ini akan menjumlahkan angka secara pasti
+
+          tableBody.innerHTML += `
+            <tr>
+              <td style="font-weight: 500;">${item.nama_produk}</td>
+              <td style="text-align: center; font-family: var(--mono);">${jumlah}</td>
+              <td style="text-align: right; font-family: var(--mono);">Rp ${Number(item.harga_satuan).toLocaleString('id-ID')}</td>
+              <td style="text-align: right; font-weight: 600; font-family: var(--mono);">Rp ${subtotal.toLocaleString('id-ID')}</td>
+            </tr>
+          `;
+        });
+    } else {
+      tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-light); padding:20px;">Tidak ada item di dalam PO ini.</td></tr>`;
+    }
+
+    // 5. Tampilkan Modal ke layar (Ubah display menjadi flex)
+    document.getElementById('detailModal').style.display = 'flex';
+
+  } catch (error) {
+    console.error(error);
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--red); padding:20px;">Gagal memuat detail item PO.</td></tr>`;
+    document.getElementById('detailModal').style.display = 'flex';
+  }
+}
+
+// Fungsi menutup modal
+function closeDetailModal() {
+  document.getElementById('detailModal').style.display = 'none';
+}
+
+// Tutup modal otomatis jika klik area luar
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('detailModal');
+  if (e.target === modal) {
+    modal.style.display = 'none';
+  }
+});
 
 // ══ GLOBAL SEARCH ══
 let searchTimer = null;
