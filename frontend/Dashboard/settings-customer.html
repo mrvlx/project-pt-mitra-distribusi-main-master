@@ -58,9 +58,81 @@
       display: flex; align-items: center; padding: 0 28px; gap: 16px;
       position: sticky; top: 0; z-index: 50;
     }
-    .search-bar { flex: 1; max-width: 400px; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 100px; padding: 8px 16px; color: var(--text-light); font-size: 13px; }
-    .search-bar input { border: none; background: transparent; outline: none; color: var(--text-dark); font-family: var(--font); font-size: 13px; width: 100%; }
-    .search-bar input::placeholder { color: var(--text-light); }
+ /* ══ FIX SEARCH BAR (Sama persis dengan dashboard & anti-melar) ══ */
+/* ══ HEADER (Disamakan dengan settings.html) ══ */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 24px; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    
+    /* Mengunci lebar agar tidak memanjang/melar memenuhi header */
+    .header .search-bar { 
+      width: 100% !important;
+      max-width: 360px !important; /* Disamakan ukurannya agar pas */
+      display: flex !important; 
+      align-items: center !important; 
+      gap: 10px !important; 
+      background: var(--bg) !important; 
+      border: 1.5px solid var(--border) !important; 
+      border-radius: 100px !important; 
+      padding: 0 14px !important; 
+      height: 36px !important; /* Mengunci tinggi kotak luar agar kecil & rapi */
+      box-sizing: border-box !important;
+    }
+    
+    /* Memaksa input mengabaikan padding besar 12px 14px dari form bawah */
+    .header .search-bar input#top-search { 
+      border: none !important; 
+      background: transparent !important; 
+      outline: none !important; 
+      color: var(--text-dark) !important; 
+      font-family: var(--font) !important; 
+      font-size: 13px !important; 
+      width: 100% !important; 
+      padding: 0 !important; /* Menghilangkan sisa padding melar */
+      height: 100% !important; 
+      margin: 0 !important;
+      box-shadow: none !important;
+    }
+    
+    .header .search-bar input#top-search::placeholder { 
+      color: var(--text-light) !important; 
+    }
+    
+    .header-right { 
+      margin-left: auto; 
+      display: flex; 
+      align-items: center; 
+      gap: 14px; 
+    }
+    
+    .notif-btn { width: 36px; height: 36px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px; }
+    
+    /* ══ FIX AVATAR HURUF (Teks pas di tengah, bulat sempurna & simetris) ══ */
+    .avatar-wrapper { 
+      width: 36px !important; 
+      height: 36px !important; 
+      border-radius: 50% !important; 
+      background: var(--primary-lt) !important; 
+      color: var(--primary) !important; 
+      display: flex !important; 
+      align-items: center !important;      /* Rata tengah vertikal */
+      justify-content: center !important;  /* Rata tengah horizontal */
+      font-weight: 700 !important; 
+      font-size: 14px !important; 
+      line-height: 1 !important;           /* Mencegah teks merusak tinggi lingkaran */
+      overflow: hidden !important; 
+      flex-shrink: 0 !important;           /* Anti gepeng */
+      box-sizing: border-box !important;
+    }
+
+    /* ══ KUNCI FORM PROFIL AGAR TIDAK MERUSAK HEADER ══ */
+    input:not(#top-search) { 
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; font-family: var(--font); font-size: 14px; transition: border-color .2s; background: white; color: var(--text-dark); 
+    }
+.search-bar input::placeholder { color: var(--text-light); }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
     .notif-btn { width: 36px; height: 36px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
     .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px; }
@@ -94,7 +166,7 @@
     .form-group { display: flex; flex-direction: column; gap: 8px; }
     .form-group.full { grid-column: 1 / -1; }
     label { font-size: 13px; font-weight: 600; color: var(--text-mid); }
-    input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; font-family: var(--font); font-size: 14px; transition: border-color .2s; background: white; color: var(--text-dark); }
+    input:not(#top-search) { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; font-family: var(--font); font-size: 14px; transition: border-color .2s; background: white; color: var(--text-dark); }
     input:focus { border-color: var(--primary); }
     input:read-only { background: var(--bg); color: var(--text-mid); cursor: not-allowed; }
 
@@ -141,19 +213,19 @@
 
 <!-- ══ MAIN ══ -->
 <div class="main">
-  <header class="header">
-    <div class="search-bar">
-      <img src="assets/search.svg" width="16" height="16">
-      <input type="text" placeholder="Cari produk, pesanan...">
-    </div>
-    <div class="header-right">
-      <div class="notif-btn">
-        <img src="assets/notif.svg" width="20" height="20">
-        <span class="notif-dot"></span>
+    <header class="header">
+      <div class="search-bar">
+        <img src="assets/search.svg" width="16" height="16">
+        <input type="text" id="top-search" placeholder="Cari produk, pesanan...">
       </div>
-      <div class="avatar-wrapper" id="header-avatar">B</div>
-    </div>
-  </header>
+      <div class="header-right">
+        <div class="notif-btn">
+          <img src="assets/notif.svg" width="20" height="20">
+          <span class="notif-dot"></span>
+        </div>
+        <div class="avatar-wrapper" id="header-avatar">B</div>
+      </div>
+    </header>
 
   <main class="content">
     <div>
@@ -346,6 +418,53 @@ function logout() {
 }
 
 loadProfile();
+
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Ambil data session user dari localStorage
+    const userDataString = localStorage.getItem('user');
+
+    // 2. Proteksi Halaman: Jika data tidak ditemukan, tendang balik ke halaman login
+    if (!userDataString) {
+      alert("Anda belum login! Silakan masuk ke akun Anda terlebih dahulu.");
+      window.location.replace("auth.html");
+      return;
+    }
+
+    const currentUser = JSON.parse(userDataString);
+
+    // 3. Ambil inisial huruf dari nama user (Misal: "Admin Utama" menjadi "AU")
+    if (currentUser.name) {
+      const nameParts = currentUser.name.trim().split(" ");
+      let initials = "";
+      if (nameParts.length > 1) {
+        initials = nameParts[0].charAt(0) + nameParts[1].charAt(0);
+      } else {
+        initials = nameParts[0].substring(0, 2);
+      }
+      
+      // Tampilkan inisial teks pada lingkaran avatar
+      const avatarText = document.getElementById('avatar-text');
+      if (avatarText) avatarText.textContent = initials.toUpperCase();
+      
+      // OPTIONAL: Menggunakan avatar otomatis berbasis gambar dari nama user jika diinginkan
+      const avatarImg = document.getElementById('avatar-img');
+      if (avatarImg) {
+        avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=EEF2FD&color=3B6AE8&bold=true`;
+        avatarImg.style.display = 'block';
+        if (avatarText) avatarText.style.display = 'none';
+      }
+    }
+  });
+
+  // Interseptasi tombol Log Out di sidebar agar menghapus sesi localstorage
+  document.addEventListener("DOMContentLoaded", function() {
+    const logoutBtn = document.querySelector('a[href="auth.html"]');
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function(e) {
+        localStorage.clear();
+      });
+    }
+  });
 </script>
 
 </body>

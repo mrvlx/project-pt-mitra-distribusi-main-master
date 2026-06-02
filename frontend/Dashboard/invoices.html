@@ -121,13 +121,14 @@
     }
     .notif-dot { width:8px; height:8px; background: var(--red); border-radius:50%; border:2px solid var(--surface); position:absolute; top:4px; right:4px; }
 
+.avatar { width:36px; height:36px; border-radius:50%; cursor:pointer; }
+
     .profile-widget {
   display: flex;
   align-items: center;
   gap: 10px;
   padding-left: 8px;
 }
-
 .avatar { width:36px; height:36px; border-radius:50%; cursor:pointer; }
 
 .avatar-wrapper {
@@ -598,10 +599,10 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    // 1. Ambil data session user dari localStorage
+    // 1. Ambil sesi user kustomer dari localStorage setelah login
     const userDataString = localStorage.getItem('user');
 
-    // 2. Proteksi Halaman: Jika data tidak ditemukan, tendang balik ke halaman login
+    // 2. Proteksi Keamanan Halaman (Tendang ke login jika belum auth)
     if (!userDataString) {
       alert("Anda belum login! Silakan masuk ke akun Anda terlebih dahulu.");
       window.location.replace("auth.html");
@@ -610,8 +611,21 @@
 
     const currentUser = JSON.parse(userDataString);
 
-    // 3. Ambil inisial huruf dari nama user (Misal: "Admin Utama" menjadi "AU")
-    if (currentUser.name) {
+    // 3. Tangkap elemen HTML profil di header
+    const nameHeader = document.getElementById('customer-header-name');
+    const emailHeader = document.getElementById('customer-header-email');
+    const avatarBox = document.getElementById('customer-avatar-box');
+
+    // 4. Suntik Data Nama dan Email secara Dinamis
+    if (nameHeader && currentUser.name) {
+      nameHeader.textContent = currentUser.name;
+    }
+    if (emailHeader && currentUser.email) {
+      emailHeader.textContent = currentUser.email;
+    }
+
+    // 5. Atur Gambar Inisial Avatar Bulat Sesuai Nama Akun yang Login
+    if (avatarBox && currentUser.name) {
       const nameParts = currentUser.name.trim().split(" ");
       let initials = "";
       if (nameParts.length > 1) {
@@ -619,31 +633,22 @@
       } else {
         initials = nameParts[0].substring(0, 2);
       }
-      
-      // Tampilkan inisial teks pada lingkaran avatar
-      const avatarText = document.getElementById('avatar-text');
-      if (avatarText) avatarText.textContent = initials.toUpperCase();
-      
-      // OPTIONAL: Menggunakan avatar otomatis berbasis gambar dari nama user jika diinginkan
-      const avatarImg = document.getElementById('avatar-img');
-      if (avatarImg) {
-        avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=EEF2FD&color=3B6AE8&bold=true`;
-        avatarImg.style.display = 'block';
-        if (avatarText) avatarText.style.display = 'none';
-      }
+      avatarBox.textContent = initials.toUpperCase();
     }
+
+    // 6. Render cart items dari localStorage
+    renderCart();
   });
 
-  // Interseptasi tombol Log Out di sidebar agar menghapus sesi localstorage
+  // Fungsi Log Out
   document.addEventListener("DOMContentLoaded", function() {
     const logoutBtn = document.querySelector('a[href="auth.html"]');
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", function(e) {
+      logoutBtn.addEventListener("click", function() {
         localStorage.clear();
       });
     }
-  });
-</script>
+  });</script>
 
 </body>
 </html>
