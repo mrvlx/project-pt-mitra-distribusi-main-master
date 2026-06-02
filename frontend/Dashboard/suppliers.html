@@ -96,9 +96,14 @@
     .bell-icon { width: 16px; height: 16px; background: var(--text-mid); border-radius: 4px;}
     .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px; }
     .avatar {
-      width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; overflow: hidden;
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; overflow: hidden;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     /* ══ CONTENT ══ */
@@ -264,8 +269,10 @@
         <span class="notif-dot"></span>
       </div>
 
-      <img class="avatar" src="assets/profil.svg" alt="User Avatar">
-    </div>
+      <div class="avatar" id="user-avatar" style="background: var(--primary-lt); color: var(--primary); font-weight: 700; font-size: 14px;">
+        <img id="avatar-img" src="assets/profil.svg" alt="User Avatar" style="width:100%; height:100%; object-fit:cover; display:none;">
+        <span id="avatar-text">A</span>
+      </div>
   </header>
 
   <main class="content">
@@ -479,7 +486,52 @@ function closeDropdown() {
 document.addEventListener('click', e => {
   if (!e.target.closest('.search-bar')) closeDropdown();
 });
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Ambil data session user dari localStorage
+    const userDataString = localStorage.getItem('user');
 
+    // 2. Proteksi Halaman: Jika data tidak ditemukan, tendang balik ke halaman login
+    if (!userDataString) {
+      alert("Anda belum login! Silakan masuk ke akun Anda terlebih dahulu.");
+      window.location.replace("auth.html");
+      return;
+    }
+
+    const currentUser = JSON.parse(userDataString);
+
+    // 3. Ambil inisial huruf dari nama user (Misal: "Admin Utama" menjadi "AU")
+    if (currentUser.name) {
+      const nameParts = currentUser.name.trim().split(" ");
+      let initials = "";
+      if (nameParts.length > 1) {
+        initials = nameParts[0].charAt(0) + nameParts[1].charAt(0);
+      } else {
+        initials = nameParts[0].substring(0, 2);
+      }
+      
+      // Tampilkan inisial teks pada lingkaran avatar
+      const avatarText = document.getElementById('avatar-text');
+      if (avatarText) avatarText.textContent = initials.toUpperCase();
+      
+      // OPTIONAL: Menggunakan avatar otomatis berbasis gambar dari nama user jika diinginkan
+      const avatarImg = document.getElementById('avatar-img');
+      if (avatarImg) {
+        avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=EEF2FD&color=3B6AE8&bold=true`;
+        avatarImg.style.display = 'block';
+        if (avatarText) avatarText.style.display = 'none';
+      }
+    }
+  });
+
+  // Interseptasi tombol Log Out di sidebar agar menghapus sesi localstorage
+  document.addEventListener("DOMContentLoaded", function() {
+    const logoutBtn = document.querySelector('a[href="auth.html"]');
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function(e) {
+        localStorage.clear();
+      });
+    }
+  });
 </script>
 </body>
 </html>
