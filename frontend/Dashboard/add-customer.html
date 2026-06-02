@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambah Customer - PT Mitra Distribusi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F4F6FB;
+      --surface: #FFFFFF;
+      --primary: #2B5EE8;
+      --red: #EF4444;
+      --amber: #F59E0B;
+      --green: #22C55E;
+      --text-dark: #1A1D2E;
+      --text-mid: #5A607A;
+      --border: #E8ECF4;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(30,40,80,.07);
+      --font: 'Plus Jakarta Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font); background: var(--bg); padding: 40px; color: var(--text-dark); }
+    .container { max-width: 700px; margin: auto; }
+    .page-title { font-size: 28px; font-weight: 800; margin-bottom: 24px; }
+
+    .card {
+      background: var(--surface); border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--border); padding: 32px;
+    }
+
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-mid);
+      padding-bottom: 12px; margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      grid-column: 1 / -1;
+    }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label { font-size: 14px; font-weight: 600; color: var(--text-mid); }
+    label .req { color: var(--red); margin-left: 2px; }
+
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-prefix {
+      position: absolute; left: 14px;
+      font-size: 13px; font-weight: 600; color: var(--text-mid); pointer-events: none;
+    }
+
+    input, select, textarea {
+      width: 100%; padding: 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      outline: none; font-family: var(--font); font-size: 14px;
+      transition: border-color .2s, box-shadow .2s; background: white;
+      color: var(--text-dark);
+    }
+    input.has-prefix { padding-left: 38px; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(43,94,232,.10);
+    }
+    input.error, select.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,.09); }
+    textarea { resize: vertical; min-height: 90px; }
+    select { appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239AA3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+    }
+
+    .hint { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+    .field-error { font-size: 12px; color: var(--red); margin-top: 2px; display: none; }
+
+    /* Credit preview */
+    .credit-preview {
+      grid-column: 1 / -1;
+      background: #EEF2FD; border: 1.5px solid rgba(43,94,232,.15);
+      border-radius: 10px; padding: 14px 18px;
+      display: none; align-items: center; gap: 16px;
+    }
+    .credit-preview-label { font-size: 12px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+    .credit-preview-bar-wrap { flex: 1; }
+    .credit-preview-amounts {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--text-mid); margin-bottom: 6px;
+    }
+    .preview-track { height: 6px; background: rgba(43,94,232,.15); border-radius: 100px; overflow: hidden; }
+    .preview-fill  { height: 100%; width: 0%; background: var(--primary); border-radius: 100px; transition: width .3s; }
+    .preview-pct   { font-size: 12px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+
+    .button-group { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+    .btn { padding: 14px 20px; border: none; border-radius: 10px; font-family: var(--font); font-weight: 700; cursor: pointer; transition: .2s; text-decoration: none; font-size: 14px; }
+    .btn-secondary { background: #E9EDF7; color: var(--text-dark); }
+    .btn-secondary:hover { background: #DCE3F2; }
+    .btn-primary { background: var(--primary); color: white; display: flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { background: #1F4DC5; }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+
+    .spinner {
+      width: 15px; height: 15px;
+      border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+      border-radius: 50%; animation: spin .7s linear infinite; display: none;
+    }
+    .btn-primary.loading .spinner { display: block; }
+    .btn-primary.loading .btn-label { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .message { margin-top: 20px; padding: 14px; border-radius: 10px; font-size: 14px; display: none; }
+    .msg-success { background: #E5F9F0; color: #16A34A; }
+    .msg-error   { background: #FDECEA; color: #DC2626; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="page-title">Tambah Customer</h1>
+
+  <div class="card">
+    <div class="form-grid">
+
+      <!-- SECTION: Perusahaan -->
+      <div class="section-label">Data Perusahaan</div>
+
+      <div class="form-group full">
+        <label>Nama Perusahaan <span class="req">*</span></label>
+        <input type="text" id="nama_perusahaan" placeholder="Contoh: PT Sejahtera Abadi">
+        <span class="field-error" id="err-nama_perusahaan">Nama perusahaan wajib diisi.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Kategori <span class="req">*</span></label>
+        <select id="kategori">
+          <option value="" disabled selected>Pilih kategori…</option>
+          <option>Manufacturing</option>
+          <option>Retail</option>
+          <option>Technology</option>
+          <option>Wholesale</option>
+          <option>Distribution</option>
+          <option>F&B</option>
+          <option>Property</option>
+          <option>Healthcare</option>
+          <option>Other</option>
+        </select>
+        <span class="field-error" id="err-kategori">Kategori wajib dipilih.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Alamat</label>
+        <input type="text" id="alamat" placeholder="Jl. Contoh No. 1, Surabaya">
+      </div>
+
+      <!-- SECTION: Kontak -->
+      <div class="section-label">Kontak</div>
+
+      <div class="form-group">
+        <label>Nama Kontak <span class="req">*</span></label>
+        <input type="text" id="nama_kontak" placeholder="Contoh: Budi Santoso">
+        <span class="field-error" id="err-nama_kontak">Nama kontak wajib diisi.</span>
+      </div>
+
+      <div class="form-group">
+        <label>No. Telepon</label>
+        <input type="tel" id="telepon" placeholder="Contoh: 081234567890">
+      </div>
+
+      <div class="form-group full">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Contoh: budi@perusahaan.com">
+        <span class="field-error" id="err-email">Format email tidak valid.</span>
+      </div>
+
+      <!-- SECTION: Kredit -->
+      <div class="section-label">Kredit</div>
+
+      <div class="form-group">
+        <label>Limit Kredit <span class="req">*</span></label>
+        <div class="input-wrap">
+          <span class="input-prefix">Rp</span>
+          <input type="number" id="limit_kredit" class="has-prefix" placeholder="0" min="0" step="1000000" oninput="updatePreview()">
+        </div>
+        <span class="hint">Dalam satuan rupiah (tanpa titik/koma)</span>
+        <span class="field-error" id="err-limit_kredit">Limit kredit wajib diisi dan lebih dari 0.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Sisa Hutang Awal</label>
+        <div class="input-wrap">
+          <span class="input-prefix">Rp</span>
+          <input type="number" id="sisa_hutang" class="has-prefix" placeholder="0" min="0" step="1000000" value="0" oninput="updatePreview()">
+        </div>
+        <span class="hint">Isi 0 jika pelanggan baru</span>
+      </div>
+
+      <!-- Credit Preview -->
+      <div class="credit-preview" id="credit-preview">
+        <span class="credit-preview-label">Preview Kredit</span>
+        <div class="credit-preview-bar-wrap">
+          <div class="credit-preview-amounts">
+            <span id="preview-used">Rp 0</span>
+            <span id="preview-limit">/ Rp 0</span>
+          </div>
+          <div class="preview-track">
+            <div class="preview-fill" id="preview-fill"></div>
+          </div>
+        </div>
+        <span class="preview-pct" id="preview-pct">0%</span>
+      </div>
+
+      <!-- Catatan -->
+      <div class="form-group full">
+        <label>Catatan</label>
+        <textarea id="catatan" placeholder="Tambahkan catatan untuk pelanggan ini…"></textarea>
+      </div>
+
+    </div>
+
+    <div class="button-group">
+      <a href="customers.html" class="btn btn-secondary">Kembali</a>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitForm()">
+        <span class="spinner"></span>
+        <span class="btn-label">Simpan Customer</span>
+      </button>
+    </div>
+
+    <div id="message-box" class="message"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3000';
+
+function fmt(n) {
+  return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+}
+
+function updatePreview() {
+  const limit  = Number(document.getElementById('limit_kredit').value) || 0;
+  const hutang = Number(document.getElementById('sisa_hutang').value)  || 0;
+  const preview = document.getElementById('credit-preview');
+
+  if (limit <= 0) { preview.style.display = 'none'; return; }
+
+  preview.style.display = 'flex';
+  const pct = Math.min((hutang / limit) * 100, 100);
+
+  document.getElementById('preview-used').textContent  = fmt(hutang);
+  document.getElementById('preview-limit').textContent = '/ ' + fmt(limit);
+
+  const fill = document.getElementById('preview-fill');
+  const pctEl = document.getElementById('preview-pct');
+  fill.style.width = pct + '%';
+
+  const color = pct >= 90 ? '#EF4444' : pct >= 70 ? '#F59E0B' : '#2B5EE8';
+  fill.style.background = color;
+  pctEl.style.color = color;
+  pctEl.textContent = pct.toFixed(1) + '% used';
+}
+
+function showMsg(text, type) {
+  const box = document.getElementById('message-box');
+  box.style.display = 'block';
+  box.className = 'message ' + (type === 'success' ? 'msg-success' : 'msg-error');
+  box.textContent = text;
+}
+
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(e => e.style.display = 'none');
+  document.querySelectorAll('.error').forEach(e => e.classList.remove('error'));
+}
+
+function markError(fieldId, errId) {
+  document.getElementById(fieldId).classList.add('error');
+  document.getElementById(errId).style.display = 'block';
+}
+
+function validate() {
+  clearErrors();
+  let ok = true;
+
+  if (!document.getElementById('nama_perusahaan').value.trim()) {
+    markError('nama_perusahaan', 'err-nama_perusahaan'); ok = false;
+  }
+  if (!document.getElementById('kategori').value) {
+    markError('kategori', 'err-kategori'); ok = false;
+  }
+  if (!document.getElementById('nama_kontak').value.trim()) {
+    markError('nama_kontak', 'err-nama_kontak'); ok = false;
+  }
+  const email = document.getElementById('email').value.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    markError('email', 'err-email'); ok = false;
+  }
+  const limit = Number(document.getElementById('limit_kredit').value);
+  if (!limit || limit <= 0) {
+    markError('limit_kredit', 'err-limit_kredit'); ok = false;
+  }
+
+  return ok;
+}
+
+async function submitForm() {
+  if (!validate()) return;
+
+  const btn = document.getElementById('submit-btn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  const payload = {
+    nama_perusahaan: document.getElementById('nama_perusahaan').value.trim(),
+    kategori:        document.getElementById('kategori').value,
+    alamat:          document.getElementById('alamat').value.trim(),
+    nama_kontak:     document.getElementById('nama_kontak').value.trim(),
+    telepon:         document.getElementById('telepon').value.trim(),
+    email:           document.getElementById('email').value.trim(),
+    limit_kredit:    Number(document.getElementById('limit_kredit').value),
+    sisa_hutang:     Number(document.getElementById('sisa_hutang').value) || 0,
+    catatan:         document.getElementById('catatan').value.trim(),
+  };
+
+  try {
+    const res = await fetch(`${API}/pelanggan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      showMsg('Customer berhasil ditambahkan!', 'success');
+      setTimeout(() => window.location.href = 'customers.html', 1500);
+    } else {
+      showMsg(result.message || 'Gagal menyimpan data.', 'error');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  } catch (e) {
+    showMsg('Terjadi kesalahan server.', 'error');
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>

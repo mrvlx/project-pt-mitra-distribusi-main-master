@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambah Warehouse - PT Mitra Distribusi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F4F6FB;
+      --surface: #FFFFFF;
+      --primary: #2B5EE8;
+      --text-dark: #1A1D2E;
+      --text-mid: #5A607A;
+      --border: #E8ECF4;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(30,40,80,.07);
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font); background: var(--bg); padding: 40px; color: var(--text-dark); }
+    .container { max-width: 700px; margin: auto; }
+    .page-title { font-size: 28px; font-weight: 800; margin-bottom: 24px; }
+    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 32px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 14px; font-weight: 600; color: var(--text-mid); }
+    input, select {
+      width: 100%; padding: 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      outline: none; font-family: var(--font); font-size: 14px;
+      transition: .2s; background: white;
+    }
+    input:focus, select:focus { border-color: var(--primary); }
+    .button-group { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+    .btn { padding: 14px 20px; border: none; border-radius: 10px; font-family: var(--font); font-weight: 700; cursor: pointer; transition: .2s; text-decoration: none; font-size: 14px; }
+    .btn-secondary { background: #E9EDF7; color: var(--text-dark); }
+    .btn-secondary:hover { background: #DCE3F2; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #1F4DC5; }
+    .message { margin-top: 20px; padding: 14px; border-radius: 10px; font-size: 14px; display: none; }
+    .success { background: #E5F9F0; color: #2ECC71; }
+    .error { background: #FDECEA; color: #E74C3C; }
+
+    /* Kapasitas hint */
+    .hint { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="page-title">Tambah Warehouse</h1>
+
+  <div class="card">
+    <form id="formTambahWarehouse">
+      <div class="form-grid">
+
+        <!-- Nama Gudang -->
+        <div class="form-group full">
+          <label>Nama Gudang</label>
+          <input type="text" id="nama_gudang" placeholder="Contoh: Gudang Bandung" required>
+        </div>
+
+        <!-- Lokasi -->
+        <div class="form-group full">
+          <label>Lokasi</label>
+          <input type="text" id="lokasi" placeholder="Contoh: Cicendo, Bandung" required>
+        </div>
+
+        <!-- Manager -->
+        <div class="form-group full">
+          <label>Manager</label>
+          <input type="text" id="manager" placeholder="Nama penanggung jawab gudang" required>
+        </div>
+
+        <!-- Kapasitas Total -->
+        <div class="form-group">
+          <label>Kapasitas Total</label>
+          <input type="number" id="kapasitas_total" placeholder="Contoh: 10000" min="0" required>
+          <span class="hint">Dalam satuan unit</span>
+        </div>
+
+        <!-- Kapasitas Terpakai -->
+        <div class="form-group">
+          <label>Kapasitas Terpakai</label>
+          <input type="number" id="kapasitas_terpakai" placeholder="Contoh: 0" min="0" value="0" required>
+          <span class="hint">Isi 0 jika gudang baru</span>
+        </div>
+
+      </div>
+
+      <div class="button-group">
+        <a href="warehouse.html" class="btn btn-secondary">Kembali</a>
+        <button type="submit" class="btn btn-primary">Simpan Warehouse</button>
+      </div>
+    </form>
+
+    <div id="message-box" class="message"></div>
+  </div>
+</div>
+
+<script>
+const BASE_URL = 'http://localhost:3000';
+const messageBox = document.getElementById('message-box');
+
+document.getElementById('formTambahWarehouse').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const kapasitas_total    = parseInt(document.getElementById('kapasitas_total').value);
+  const kapasitas_terpakai = parseInt(document.getElementById('kapasitas_terpakai').value);
+
+  if (kapasitas_terpakai > kapasitas_total) {
+    messageBox.style.display = 'block';
+    messageBox.className = 'message error';
+    messageBox.innerHTML = 'Kapasitas terpakai tidak boleh melebihi kapasitas total!';
+    return;
+  }
+
+  const data = {
+    nama_gudang:       document.getElementById('nama_gudang').value,
+    lokasi:            document.getElementById('lokasi').value,
+    manager:           document.getElementById('manager').value,
+    kapasitas_total,
+    kapasitas_terpakai,
+  };
+
+  try {
+    const response = await fetch(`${BASE_URL}/gudang`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      messageBox.style.display = 'block';
+      messageBox.className = 'message success';
+      messageBox.innerHTML = 'Warehouse berhasil ditambahkan!';
+
+      document.getElementById('formTambahWarehouse').reset();
+      document.getElementById('kapasitas_terpakai').value = '0';
+
+      setTimeout(() => {
+        window.location.href = 'warehouse.html';
+      }, 1500);
+
+    } else {
+      messageBox.style.display = 'block';
+      messageBox.className = 'message error';
+      messageBox.innerHTML = result.message || 'Gagal menambahkan warehouse';
+    }
+
+  } catch (error) {
+    console.error(error);
+    messageBox.style.display = 'block';
+    messageBox.className = 'message error';
+    messageBox.innerHTML = 'Terjadi kesalahan server';
+  }
+});
+</script>
+
+</body>
+</html>

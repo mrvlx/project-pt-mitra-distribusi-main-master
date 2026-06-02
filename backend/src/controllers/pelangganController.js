@@ -62,16 +62,32 @@ exports.searchPelanggan = (req, res) => {
 
 exports.createPelanggan = (req, res) => {
 
-    const { nama_perusahaan, limit_kredit, sisa_hutang } = req.body;
+    const {
+        nama_perusahaan,
+        limit_kredit,
+        sisa_hutang,
+        kategori,
+        alamat,
+        nama_kontak,
+        telepon,
+        email,
+        catatan
+    } = req.body;
 
     const sql = `
         INSERT INTO pelanggan
         (
             nama_perusahaan,
             limit_kredit,
-            sisa_hutang
+            sisa_hutang,
+            kategori,
+            alamat,
+            nama_kontak,
+            telepon,
+            email,
+            catatan
         )
-        VALUES (?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(
@@ -79,17 +95,19 @@ exports.createPelanggan = (req, res) => {
         [
             nama_perusahaan,
             limit_kredit,
-            sisa_hutang
+            sisa_hutang,
+            kategori    ?? null,
+            alamat      ?? null,
+            nama_kontak ?? null,
+            telepon     ?? null,
+            email       ?? null,
+            catatan     ?? null
         ],
         (err, result) => {
 
-            if (err) {
-                return res.status(500).json(err);
-            }
+            if (err) return res.status(500).json(err);
 
-            res.json({
-                message: 'Data berhasil ditambahkan'
-            });
+            res.json({ message: 'Data berhasil ditambahkan' });
 
         }
     );

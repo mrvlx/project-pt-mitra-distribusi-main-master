@@ -23,6 +23,7 @@ const detailItemPoRoutes = require('./routes/detailItemPoRoutes');
 const salesOrderRoutes = require('./routes/salesOrderRoutes');
 const detailItemSoRoutes = require('./routes/detailItemSoRoutes');
 const pergerakanStokRoutes = require('./routes/pergerakanStokRoutes');
+const searchRoutes = require('./routes/searchRoutes'); // ← tambah ini
 
 app.use('/users', usersRoutes);
 app.use('/kategori', kategoriRoutes);
@@ -35,6 +36,7 @@ app.use('/detail-item-po', detailItemPoRoutes);
 app.use('/sales-order', salesOrderRoutes);
 app.use('/detail-item-so', detailItemSoRoutes);
 app.use('/pergerakan-stok', pergerakanStokRoutes);
+app.use('/search', searchRoutes); // ← tambah ini
 
 app.get('/', (req, res) => {
     res.sendFile(
