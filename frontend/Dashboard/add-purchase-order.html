@@ -27,7 +27,6 @@
     .section-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .form-group { display: flex; flex-direction: column; gap: 8px; }
-    .form-group.full { grid-column: 1 / -1; }
     label { font-size: 13px; font-weight: 600; color: var(--text-mid); }
     input, select {
       width: 100%; padding: 12px 14px;
@@ -44,7 +43,7 @@
       grid-template-columns: 2fr 1fr 1fr 1fr 40px;
       gap: 10px; align-items: center;
     }
-    .product-row input { padding: 10px 12px; font-size: 13px; }
+    .product-row input, .product-row select { padding: 10px 12px; font-size: 13px; }
     .subtotal-display {
       font-size: 13px; font-weight: 600; color: var(--text-dark);
       background: var(--bg); border: 1.5px solid var(--border);
@@ -100,20 +99,19 @@
 <div class="container">
   <h1 class="page-title">Tambah Purchase Order</h1>
 
-  <!-- Section 1: Info PO -->
   <div class="card">
     <div class="section-title">📋 Informasi Purchase Order</div>
     <div class="form-grid">
 
       <div class="form-group">
-        <label>ID Pemasok</label>
+        <label>Pemasok</label>
         <select id="id_pemasok" required>
           <option value="">Memuat pemasok...</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>ID Gudang</label>
+        <label>Gudang Tujuan</label>
         <select id="id_gudang" required>
           <option value="">Memuat gudang...</option>
         </select>
@@ -128,21 +126,20 @@
         <label>Status PO</label>
         <select id="status_po" required>
           <option value="Draft">Draft</option>
-          <option value="Dikirim">Dikirim</option>
-          <option value="Diterima">Diterima</option>
-          <option value="Dibatalkan">Dibatalkan</option>
+          <option value="Sent">Sent</option>
+          <option value="Received">Received</option>
+          <option value="Cancelled">Cancelled</option>
         </select>
       </div>
 
     </div>
   </div>
 
-  <!-- Section 2: Detail Produk -->
   <div class="card">
     <div class="section-title">📦 Detail Produk</div>
 
     <div class="product-header">
-      <span>ID Produk</span>
+      <span>Pilih Produk</span>
       <span>Qty</span>
       <span>Harga Beli (Rp)</span>
       <span>Subtotal</span>
@@ -161,7 +158,6 @@
     </div>
   </div>
 
-  <!-- Buttons -->
   <div class="button-group">
     <a href="purchase.html" class="btn btn-secondary">Kembali</a>
     <button type="button" class="btn btn-primary" onclick="submitPO()">Simpan Purchase Order</button>
@@ -174,6 +170,7 @@
 const BASE_URL = 'http://localhost:3000';
 const messageBox = document.getElementById('message-box');
 let rowCount = 0;
+let produkList = []; // Menyimpan master data produk untuk dropdown
 
 // Default tanggal hari ini
 const today = new Date().toISOString().split('T')[0];
@@ -209,23 +206,57 @@ async function loadGudang() {
   }
 }
 
-// Tambah row produk
+// 🔥 TAMBAHAN: Load Data Produk untuk Dropdown di baris detail
+async function loadProduk() {
+  try {
+    const res = await fetch(`${BASE_URL}/produk`);
+    produkList = await res.json();
+  } catch (e) {
+    console.error("Gagal memuat produk untuk dropdown", e);
+  }
+}
+
+// Tambah row produk (Sekarang menggunakan Dropdown Select Nama Produk)
 function addProductRow() {
   rowCount++;
   const id = `row_${rowCount}`;
   const list = document.getElementById('productList');
 
+  // Bikin list pilihan produk dari master data
+  let produkOptions = '<option value="">-- Pilih Produk --</option>';
+  produkList.forEach(p => {
+    produkOptions += `<option value="${p.id_produk}">${p.nama_produk}</option>`;
+  });
+
   const row = document.createElement('div');
   row.className = 'product-row';
   row.id = id;
   row.innerHTML = `
-    <input type="number" placeholder="ID Produk" class="id_produk" min="1" oninput="calcSubtotal('${id}')">
-    <input type="number" placeholder="Qty" class="qty" min="1" oninput="calcSubtotal('${id}')">
+    <select class="id_produk" onchange="handleProductSelect('${id}')" required>
+      ${produkOptions}
+    </select>
+    <input type="number" placeholder="Qty" class="qty" min="1" value="1" oninput="calcSubtotal('${id}')">
     <input type="number" placeholder="Harga Beli" class="harga_beli" min="0" oninput="calcSubtotal('${id}')">
     <div class="subtotal-display" id="sub_${id}">Rp 0</div>
     <button type="button" class="btn-remove" onclick="removeRow('${id}')">×</button>
   `;
   list.appendChild(row);
+}
+
+// 🔥 TAMBAHAN: Ketika produk dipilih di dropdown, otomatis isi default harga belinya
+function handleProductSelect(id) {
+  const row = document.getElementById(id);
+  const selectProduk = row.querySelector('.id_produk');
+  const inputHarga = row.querySelector('.harga_beli');
+  
+  const selectedId = parseInt(selectProduk.value);
+  const produkYangDipilih = produkList.find(p => p.id_produk === selectedId);
+  
+  if (produkYangDipilih) {
+    // Otomatis isi kolom harga jika ada field harga_beli atau harga di tabel produk kamu
+    inputHarga.value = produkYangDipilih.harga_beli || produkYangDipilih.harga || 0;
+  }
+  calcSubtotal(id);
 }
 
 // Hitung subtotal per row
@@ -256,7 +287,7 @@ function removeRow(id) {
   updateTotal();
 }
 
-// Submit PO
+// 🔥 PERBAIKAN TOTAL: Submit PO langsung mengirim array items dalam satu request tunggal
 async function submitPO() {
   const rows = document.querySelectorAll('.product-row');
 
@@ -273,7 +304,6 @@ async function submitPO() {
     return;
   }
 
-  // Kumpulin items
   const items = [];
   let total = 0;
   let valid = true;
@@ -291,49 +321,41 @@ async function submitPO() {
   });
 
   if (!valid) {
-    showMessage('error', 'Lengkapi semua field produk!');
+    showMessage('error', 'Lengkapi semua data produk dan harganya!');
     return;
   }
 
+  // Gabungkan info utama dengan array items langsung ke dalam 1 objek bungkusan data
   const poData = {
     id_pemasok,
     id_gudang,
     tanggal_po:  document.getElementById('tanggal_po').value,
     status_po:   document.getElementById('status_po').value,
     total_bayar: total,
+    items: items // <-- SEKARANG ARRAY ITEMS-NYA SUDAH IKUT TERKIRIM KE BACKEND!
   };
 
   try {
-    // 1. Insert PO
+    // Cukup panggil 1 endpoint POST saja, backend kita yang akan langsung split masuk ke detail_item_po
     const poRes = await fetch(`${BASE_URL}/purchase-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(poData)
     });
+    
     const poResult = await poRes.json();
-    if (!poRes.ok) { showMessage('error', poResult.message || 'Gagal membuat PO'); return; }
-
-    // 2. Ambil id_po terbaru
-    const poListRes = await fetch(`${BASE_URL}/purchase-order`);
-    const poList = await poListRes.json();
-    const newPO = poList[poList.length - 1];
-    const id_po = newPO.id_po;
-
-    // 3. Insert detail items
-    for (const item of items) {
-      await fetch(`${BASE_URL}/detail-po`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_po, ...item })
-      });
+    
+    if (!poRes.ok) { 
+      showMessage('error', poResult.message || 'Gagal membuat PO'); 
+      return; 
     }
 
-    showMessage('success', 'Purchase order berhasil ditambahkan!');
+    showMessage('success', 'Purchase order dan detail item berhasil disimpan!');
     setTimeout(() => { window.location.href = 'purchase.html'; }, 1500);
 
   } catch (err) {
     console.error(err);
-    showMessage('error', 'Terjadi kesalahan server');
+    showMessage('error', 'Terjadi kesalahan pada koneksi server');
   }
 }
 
@@ -343,10 +365,15 @@ function showMessage(type, text) {
   messageBox.innerHTML = text;
 }
 
-// Init
-loadPemasok();
-loadGudang();
-addProductRow();
+// 🔥 Inisialisasi halaman berurutan agar dropdown produk siap dipakai
+async function init() {
+  await loadPemasok();
+  await loadGudang();
+  await loadProduk(); // Load data master produk
+  addProductRow();    // Generate baris pertama dengan dropdown yang sudah siap
+}
+
+init();
 </script>
 
 </body>

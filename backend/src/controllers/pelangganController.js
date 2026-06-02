@@ -61,56 +61,38 @@ exports.searchPelanggan = (req, res) => {
 };
 
 exports.createPelanggan = (req, res) => {
-
-    const {
-        nama_perusahaan,
-        limit_kredit,
-        sisa_hutang,
+    // 1. Ambil data yang dikirim dari frontend saja
+    const { 
+        nama_perusahaan, 
         kategori,
-        alamat,
         nama_kontak,
-        telepon,
         email,
-        catatan
+        limit_kredit, 
+        sisa_hutang
     } = req.body;
 
+    // 2. Hapus kolom alamat, telepon, catatan dari query INSERT
     const sql = `
         INSERT INTO pelanggan
-        (
-            nama_perusahaan,
-            limit_kredit,
-            sisa_hutang,
-            kategori,
-            alamat,
-            nama_kontak,
-            telepon,
-            email,
-            catatan
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (nama_perusahaan, kategori, nama_kontak, email, limit_kredit, sisa_hutang)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    db.query(
-        sql,
-        [
-            nama_perusahaan,
-            limit_kredit,
-            sisa_hutang,
-            kategori    ?? null,
-            alamat      ?? null,
-            nama_kontak ?? null,
-            telepon     ?? null,
-            email       ?? null,
-            catatan     ?? null
-        ],
-        (err, result) => {
-
-            if (err) return res.status(500).json(err);
-
-            res.json({ message: 'Data berhasil ditambahkan' });
-
+    // 3. Masukkan variabel yang sesuai saja
+    db.query(sql, [
+        nama_perusahaan, 
+        kategori, 
+        nama_kontak, 
+        email || '', // Jaga-jaga kalau email dikosongkan di form
+        limit_kredit, 
+        sisa_hutang || 0
+    ], (err, result) => {
+        if (err) {
+            console.error("Error SQL:", err); // Agar error database kelihatan di terminal
+            return res.status(500).json(err);
         }
-    );
+        res.json({ message: 'Data berhasil ditambahkan' });
+    });
 };
 
 exports.updatePelanggan = (req, res) => {

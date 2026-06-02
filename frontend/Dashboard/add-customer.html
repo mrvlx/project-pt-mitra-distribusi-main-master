@@ -121,7 +121,6 @@
   <div class="card">
     <div class="form-grid">
 
-      <!-- SECTION: Perusahaan -->
       <div class="section-label">Data Perusahaan</div>
 
       <div class="form-group full">
@@ -130,7 +129,7 @@
         <span class="field-error" id="err-nama_perusahaan">Nama perusahaan wajib diisi.</span>
       </div>
 
-      <div class="form-group">
+      <div class="form-group full">
         <label>Kategori <span class="req">*</span></label>
         <select id="kategori">
           <option value="" disabled selected>Pilih kategori…</option>
@@ -147,23 +146,12 @@
         <span class="field-error" id="err-kategori">Kategori wajib dipilih.</span>
       </div>
 
-      <div class="form-group">
-        <label>Alamat</label>
-        <input type="text" id="alamat" placeholder="Jl. Contoh No. 1, Surabaya">
-      </div>
-
-      <!-- SECTION: Kontak -->
       <div class="section-label">Kontak</div>
 
-      <div class="form-group">
+      <div class="form-group full">
         <label>Nama Kontak <span class="req">*</span></label>
         <input type="text" id="nama_kontak" placeholder="Contoh: Budi Santoso">
         <span class="field-error" id="err-nama_kontak">Nama kontak wajib diisi.</span>
-      </div>
-
-      <div class="form-group">
-        <label>No. Telepon</label>
-        <input type="tel" id="telepon" placeholder="Contoh: 081234567890">
       </div>
 
       <div class="form-group full">
@@ -172,7 +160,6 @@
         <span class="field-error" id="err-email">Format email tidak valid.</span>
       </div>
 
-      <!-- SECTION: Kredit -->
       <div class="section-label">Kredit</div>
 
       <div class="form-group">
@@ -194,7 +181,6 @@
         <span class="hint">Isi 0 jika pelanggan baru</span>
       </div>
 
-      <!-- Credit Preview -->
       <div class="credit-preview" id="credit-preview">
         <span class="credit-preview-label">Preview Kredit</span>
         <div class="credit-preview-bar-wrap">
@@ -207,12 +193,6 @@
           </div>
         </div>
         <span class="preview-pct" id="preview-pct">0%</span>
-      </div>
-
-      <!-- Catatan -->
-      <div class="form-group full">
-        <label>Catatan</label>
-        <textarea id="catatan" placeholder="Tambahkan catatan untuk pelanggan ini…"></textarea>
       </div>
 
     </div>
@@ -309,15 +289,12 @@ async function submitForm() {
   btn.disabled = true;
 
   const payload = {
-    nama_perusahaan: document.getElementById('nama_perusahaan').value.trim(),
-    kategori:        document.getElementById('kategori').value,
-    alamat:          document.getElementById('alamat').value.trim(),
-    nama_kontak:     document.getElementById('nama_kontak').value.trim(),
-    telepon:         document.getElementById('telepon').value.trim(),
-    email:           document.getElementById('email').value.trim(),
-    limit_kredit:    Number(document.getElementById('limit_kredit').value),
-    sisa_hutang:     Number(document.getElementById('sisa_hutang').value) || 0,
-    catatan:         document.getElementById('catatan').value.trim(),
+      nama_perusahaan: document.getElementById('nama_perusahaan').value.trim(),
+      kategori:        document.getElementById('kategori').value,
+      nama_kontak:     document.getElementById('nama_kontak').value.trim(),
+      email:           document.getElementById('email').value.trim(),
+      limit_kredit:    Number(document.getElementById('limit_kredit').value),
+      sisa_hutang:     Number(document.getElementById('sisa_hutang').value) || 0,
   };
 
   try {

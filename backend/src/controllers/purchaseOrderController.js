@@ -38,34 +38,70 @@ exports.searchPurchaseOrder = (req, res) => {
 };
 
 exports.createPurchaseOrder = (req, res) => {
-    const { id_pemasok, id_gudang, tanggal_po, status_po, total_bayar } = req.body;
+    const {
+        id_pemasok,
+        id_gudang,
+        tanggal_po,
+        status_po,
+        total_bayar,
+        items // Array produk dari frontend
+    } = req.body;
 
-    const sql = `
-        INSERT INTO purchase_order
-        (
-            id_pemasok,
-            id_gudang,
-            tanggal_po,
-            status_po,
-            total_bayar
-        )
+    const sqlMaster = `
+        INSERT INTO purchase_order (id_pemasok, id_gudang, tanggal_po, status_po, total_bayar)
         VALUES (?, ?, ?, ?, ?)
     `;
 
-    db.query(
-        sql,
-        [
-            id_pemasok,
-            id_gudang,
-            tanggal_po,
-            status_po,
-            total_bayar
-        ],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ message: 'Purchase order berhasil ditambahkan' });
+    db.query(sqlMaster, [id_pemasok, id_gudang, tanggal_po, status_po, total_bayar], (err, result) => {
+        if (err) return res.status(500).json(err);
+
+        const id_po_terbaru = result.insertId;
+        const listBarang = items || req.body.details || req.body.products || [];
+
+        // Jika ada barang, masukkan ke detail_item_po
+        if (listBarang && listBarang.length > 0) {
+            const sqlDetail = `
+                INSERT INTO detail_item_po (id_po, id_produk, qty, harga_beli, subtotal)
+                VALUES ?
+            `;
+
+            const values = listBarang.map(item => [
+                id_po_terbaru,
+                item.id_produk || item.id_product,
+                item.qty || item.quantity,
+                item.harga_beli || item.harga,
+                item.subtotal || ((item.qty || 1) * (item.harga_beli || 0))
+            ]);
+
+            db.query(sqlDetail, [values], (errDetail) => {
+                if (errDetail) return res.status(500).json({ message: "Gagal simpan detail", error: errDetail });
+                
+                res.json({ message: 'Purchase Order dan detail item berhasil ditambahkan', id_po: id_po_terbaru });
+            });
+        } else {
+            // Jika ITEMS tetap 0, berarti listBarang kosong/tidak terbaca dari frontend
+            res.json({ message: 'Purchase Order berhasil ditambahkan (Tanpa Item Detail karena data items kosong)', id_po: id_po_terbaru });
         }
-    );
+    });
+};
+
+// 🔥 TAMBAHKAN INI: Untuk handle route '/:id/items' (Mengisi panel detail sebelah kanan)
+exports.getPurchaseOrderItems = (req, res) => {
+    const { id } = req.params; // ini menerima id_po
+
+    const sql = `
+        SELECT 
+            d.*, 
+            p.nama_produk 
+        FROM detail_item_po d
+        LEFT JOIN produk p ON d.id_produk = p.id_produk
+        WHERE d.id_po = ?
+    `;
+
+    db.query(sql, [id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result); // Mengembalikan array item untuk PO tersebut
+    });
 };
 
 exports.updatePurchaseOrder = (req, res) => {
