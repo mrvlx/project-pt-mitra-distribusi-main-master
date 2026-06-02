@@ -38,6 +38,7 @@ exports.searchSalesOrder = (req, res) => {
 };
 
 exports.createSalesOrder = (req, res) => {
+    // 1. Tangkap semua data dari frontend, termasuk array 'items'
     const {
         tanggal_so,
         id_pelanggan,
@@ -45,7 +46,8 @@ exports.createSalesOrder = (req, res) => {
         total_bayar,
         status_so,
         status_bayar,
-        jatuh_tempo
+        jatuh_tempo,
+        items // <-- WAJIB ditangkap di sini
     } = req.body;
 
     const sql = `
@@ -62,6 +64,7 @@ exports.createSalesOrder = (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
+    // 2. Insert data ke tabel utama (sales_order) terlebih dahulu
     db.query(
         sql,
         [
@@ -75,7 +78,48 @@ exports.createSalesOrder = (req, res) => {
         ],
         (err, result) => {
             if (err) return res.status(500).json(err);
-            res.json({ message: 'Sales order berhasil ditambahkan' });
+            
+            // 3. Ambil ID SO yang baru saja dibuat oleh database
+            const id_so_terbaru = result.insertId;
+
+            // Antisipasi jika frontend mengirimkan nama key berbeda (items / details / products)
+            const listBarang = items || req.body.details || req.body.products || [];
+
+            // 4. Jika ada list produk yang dikirim, lakukan Bulk Insert ke detail_item_so
+            if (listBarang && listBarang.length > 0) {
+                const sqlDetail = `
+                    INSERT INTO detail_item_so
+                    (id_so, id_produk, qty, harga_satuan, subtotal)
+                    VALUES ?
+                `;
+
+                // Transformasikan array objek menjadi array di dalam array [[id_so, id_prod, qty, hrg, sub], [...]]
+                const values = listBarang.map(item => [
+                    id_so_terbaru,                        // Hubungkan dengan ID SO utama
+                    item.id_produk || item.id_product,    // Antisipasi nama properti id_produk
+                    item.qty || item.quantity,            // Antisipasi nama properti quantity
+                    item.harga_satuan || item.harga,      // Antisipasi nama properti harga
+                    item.subtotal || ( (item.qty || 1) * (item.harga_satuan || 0) )
+                ]);
+
+                // Eksekusi query detail menggunakan format array [values] khas driver MySQL Node.js
+                db.query(sqlDetail, [values], (errDetail, resultDetail) => {
+                    if (errDetail) {
+                        console.error("Gagal menyimpan detail SO:", errDetail);
+                        return res.status(500).json({ message: "Gagal menyimpan detail item", error: errDetail });
+                    }
+                    
+                    // Respon jika sukses menyimpan master dan detail
+                    res.json({ 
+                        message: 'Sales order dan detail item berhasil ditambahkan', 
+                        id_so: id_so_terbaru 
+                    });
+                });
+
+            } else {
+                // Jika ternyata tidak ada barang (fallback safety)
+                res.json({ message: 'Sales order berhasil ditambahkan (tanpa item detail)' });
+            }
         }
     );
 };

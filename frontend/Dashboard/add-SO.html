@@ -101,7 +101,6 @@
 <div class="container">
   <h1 class="page-title">Tambah Sales Order</h1>
 
-  <!-- Section 1: Info SO -->
   <div class="card">
     <div class="section-title">📋 Informasi Order</div>
     <div class="form-grid">
@@ -117,13 +116,17 @@
       </div>
 
       <div class="form-group">
-        <label>ID Pelanggan</label>
-        <input type="number" id="id_pelanggan" placeholder="Contoh: 1" required>
+        <label>Pelanggan</label>
+        <select id="id_pelanggan" required>
+          <option value="">-- Pilih Pelanggan --</option>
+        </select>
       </div>
 
       <div class="form-group">
-        <label>ID Gudang</label>
-        <input type="number" id="id_gudang" placeholder="Contoh: 1" required>
+        <label>Gudang</label>
+        <select id="id_gudang" required>
+          <option value="">-- Pilih Gudang --</option>
+        </select>
       </div>
 
       <div class="form-group">
@@ -146,31 +149,30 @@
     </div>
   </div>
 
-  <!-- Section 2: Detail Produk -->
-  <div class="card">
-    <div class="section-title">📦 Detail Produk</div>
+  <div class="card" style="margin-top: 24px;">
+    <div class="section-title" style="font-weight: 700; margin-bottom: 16px;">📦 Detail Produk</div>
 
-    <div class="product-header">
-      <span>ID Produk</span>
+    <div class="product-header" style="display: grid; grid-template-columns: 2fr 1fr 1.5fr 1.5fr auto; gap: 12px; margin-bottom: 12px; font-weight: 600; color: var(--text-mid);">
+      <span>Nama Produk</span>
       <span>Qty</span>
       <span>Harga Satuan (Rp)</span>
       <span>Subtotal</span>
-      <span></span>
+      <span>Aksi</span>
     </div>
 
-    <div class="product-list" id="productList"></div>
+    <div class="product-list" id="productList">
+    </div>
 
-    <button type="button" class="btn-add-product" onclick="addProductRow()">
+    <button type="button" class="btn-add-product" onclick="addProductRow()" style="margin-top: 14px; padding: 10px 16px; background: #EEF2FD; color: var(--primary); border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
       + Tambah Produk
     </button>
 
-    <div class="total-section">
-      <span class="total-label">Total Bayar:</span>
-      <span class="total-value" id="totalDisplay">Rp 0</span>
+    <div class="total-section" style="margin-top: 24px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; border-top: 1px solid var(--border); padding-top: 16px;">
+      <span class="total-label" style="font-weight: 600; color: var(--text-mid);">Total Bayar:</span>
+      <span class="total-value" id="totalDisplay" style="font-size: 18px; font-weight: 800; color: var(--primary);">Rp 0</span>
     </div>
   </div>
 
-  <!-- Buttons -->
   <div class="button-group">
     <a href="orders.html" class="btn btn-secondary">Kembali</a>
     <button type="button" class="btn btn-primary" onclick="submitSO()">Simpan Sales Order</button>
@@ -181,140 +183,228 @@
 
 <script>
 const BASE_URL = 'http://localhost:3000';
+let masterProduk = []; 
 const messageBox = document.getElementById('message-box');
-let rowCount = 0;
 
-// Default tanggal
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('tanggal_so').value = today;
-const next30 = new Date();
-next30.setDate(next30.getDate() + 30);
-document.getElementById('jatuh_tempo').value = next30.toISOString().split('T')[0];
+// 1. Jalankan otomatis saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadMasterData();
+  addProductRow(); 
+});
 
-// Tambah row produk
+// 2. Ambil data dari API Backend untuk mengisi Dropdown
+async function loadMasterData() {
+  try {
+      console.log("Mengambil data pelanggan...");
+      const pelanggan = await fetch(`${BASE_URL}/pelanggan`).then(r => r.json());
+      
+      const selectPelanggan = document.getElementById('id_pelanggan');
+      if (selectPelanggan && Array.isArray(pelanggan)) {
+        selectPelanggan.innerHTML = '<option value="">-- Pilih Pelanggan --</option>' + 
+          pelanggan.map(p => `
+            <option value="${p.id_pelanggan}">${p.nama_perusahaan}</option>
+          `).join('');
+      }
+
+    console.log("Mengambil master data gudang...");
+    const dataGudang = await fetch(`${BASE_URL}/gudang`).then(r => r.json());
+    
+    const selectGudang = document.getElementById('id_gudang');
+    if (selectGudang && Array.isArray(dataGudang)) {
+      selectGudang.innerHTML = '<option value="">-- Pilih Gudang --</option>' + 
+        dataGudang.map(g => `
+          <option value="${g.id_gudang}">${g.nama_gudang}</option>
+        `).join('');
+    }
+
+    console.log("Mengambil data produk...");
+    const produk = await fetch(`${BASE_URL}/produk`).then(r => r.json());
+    
+    masterProduk = Array.isArray(produk) ? produk : [];
+    
+    const firstRow = document.querySelector('.product-row');
+    if (firstRow) {
+      const selectNode = firstRow.querySelector('.prod-select');
+      if (selectNode) {
+        selectNode.innerHTML = '<option value="">-- Pilih Produk --</option>' + 
+          masterProduk.map(p => `
+            <option value="${p.id_produk}" data-harga="${p.harga_jual || p.harga_beli || p.harga}">${p.nama_produk}</option>
+          `).join('');
+      }
+    }
+
+  } catch (err) {
+    console.error("Gagal memuat data master ke dropdown:", err);
+  }
+}
+
+// 3. Tambah baris produk berupa DROPDOWN
 function addProductRow() {
-  rowCount++;
-  const id = `row_${rowCount}`;
-  const list = document.getElementById('productList');
+  const container = document.getElementById('productList'); 
+  const rowId = 'row_' + Date.now() + '_' + Math.floor(Math.random() * 100);
 
-  const row = document.createElement('div');
-  row.className = 'product-row';
-  row.id = id;
-  row.innerHTML = `
-    <input type="number" placeholder="ID Produk" class="id_produk" min="1" oninput="calcSubtotal('${id}')">
-    <input type="number" placeholder="Qty" class="qty" min="1" oninput="calcSubtotal('${id}')">
-    <input type="number" placeholder="Harga Satuan" class="harga_satuan" min="0" oninput="calcSubtotal('${id}')">
-    <div class="subtotal-display" id="sub_${id}">Rp 0</div>
-    <button type="button" class="btn-remove" onclick="removeRow('${id}')">×</button>
+  // Menggunakan harga_jual terlebih dahulu karena ini form penjualan (SO)
+  const opsiProduk = masterProduk.map(p => 
+    `<option value="${p.id_produk}" data-harga="${p.harga_jual || p.harga_beli || p.harga}">${p.nama_produk} (Stok: ${p.stok_total})</option>`
+  ).join('');
+
+  const rowHtml = `
+    <div class="product-row" id="${rowId}" style="display: grid; grid-template-columns: 2fr 1fr 1.5fr 1.5fr auto; gap: 12px; margin-bottom: 12px; align-items: center;">
+      <div>
+        <select class="prod-select" onchange="updateRowPrice('${rowId}')" required style="width:100%;">
+          <option value="">-- Pilih Produk --</option>
+          ${opsiProduk}
+        </select>
+      </div>
+      <div>
+        <input type="number" class="prod-qty" min="1" value="1" oninput="calculateRowSubtotal('${rowId}')" required style="width:100%;">
+      </div>
+      <div>
+        <input type="text" class="prod-price" placeholder="Harga" readonly style="background: #F4F6FB; width:100%;">
+      </div>
+      <div>
+        <input type="text" class="prod-subtotal" placeholder="0" readonly style="background: #F4F6FB; font-weight:600; width:100%;">
+      </div>
+      <div>
+        <button type="button" onclick="removeProductRow('${rowId}')" style="background:#FDECEA; color:#E84B3A; border:none; padding: 8px 12px; border-radius:6px; cursor:pointer;">✕</button>
+      </div>
+    </div>
   `;
-  list.appendChild(row);
+
+  container.insertAdjacentHTML('beforeend', rowHtml);
 }
 
-// Hitung subtotal per row
-function calcSubtotal(id) {
-  const row = document.getElementById(id);
-  const qty = parseFloat(row.querySelector('.qty').value) || 0;
-  const harga = parseFloat(row.querySelector('.harga_satuan').value) || 0;
-  const sub = qty * harga;
-  row.querySelector(`#sub_${id}`).textContent = 'Rp ' + sub.toLocaleString('id-ID');
-  updateTotal();
+// 4. Update harga ketika dropdown produk dipilih
+function updateRowPrice(rowId) {
+  const row = document.getElementById(rowId);
+  const selectNode = row.querySelector('.prod-select');
+  const selectedOption = selectNode.options[selectNode.selectedIndex];
+  
+  const harga = selectedOption.getAttribute('data-harga') || 0;
+  row.querySelector('.prod-price').value = harga;
+  
+  calculateRowSubtotal(rowId);
 }
 
-// Update total keseluruhan
-function updateTotal() {
-  const rows = document.querySelectorAll('.product-row');
-  let total = 0;
-  rows.forEach(row => {
-    const qty = parseFloat(row.querySelector('.qty').value) || 0;
-    const harga = parseFloat(row.querySelector('.harga_satuan').value) || 0;
-    total += qty * harga;
+// 5. Hitung Subtotal per baris (Harga x Qty)
+function calculateRowSubtotal(rowId) {
+  const row = document.getElementById(rowId);
+  const qty = parseFloat(row.querySelector('.prod-qty').value) || 0;
+  const harga = parseFloat(row.querySelector('.prod-price').value) || 0;
+  
+  const subtotal = qty * harga;
+  row.querySelector('.prod-subtotal').value = subtotal;
+
+  calculateGrandTotal();
+}
+
+// 6. Hitung Akumulasi Total Bayar Keseluruhan
+function calculateGrandTotal() {
+  let grandTotal = 0;
+  document.querySelectorAll('.product-row').forEach(row => {
+    const sub = parseFloat(row.querySelector('.prod-subtotal').value) || 0;
+    grandTotal += sub;
   });
-  document.getElementById('totalDisplay').textContent = 'Rp ' + total.toLocaleString('id-ID');
+  document.getElementById('totalDisplay').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
 }
 
-// Hapus row
-function removeRow(id) {
-  document.getElementById(id).remove();
-  updateTotal();
+// 7. Hapus baris produk dinamis
+function removeProductRow(rowId) {
+  const row = document.getElementById(rowId);
+  if (document.querySelectorAll('.product-row').length > 1) {
+    row.remove();
+    calculateGrandTotal();
+  } else {
+    alert("Minimal harus ada 1 produk dalam transaksi!");
+  }
 }
 
-// Submit SO
+// 8. FUNGSI UNTUK MENYIMPAN SALES ORDER KE BACKEND
 async function submitSO() {
-  const rows = document.querySelectorAll('.product-row');
+  const tanggal_so = document.getElementById('tanggal_so').value;
+  const jatuh_tempo = document.getElementById('jatuh_tempo').value;
+  const id_pelanggan = document.getElementById('id_pelanggan').value;
+  const id_gudang = document.getElementById('id_gudang').value;
+  const status_so = document.getElementById('status_so').value;
+  const status_bayar = document.getElementById('status_bayar').value;
 
-  if (rows.length === 0) {
-    showMessage('error', 'Tambahkan minimal 1 produk!');
+  if (!tanggal_so || !id_pelanggan || !id_gudang) {
+    alert("Waduh, Tanggal SO, Pelanggan, atau Gudang masih ada yang kosong nih!");
     return;
   }
 
-  // Kumpulin items
   const items = [];
-  let total = 0;
-  let valid = true;
+  let total_bayar = 0;
 
-  rows.forEach(row => {
-    const id_produk   = parseInt(row.querySelector('.id_produk').value);
-    const qty         = parseInt(row.querySelector('.qty').value);
-    const harga_satuan = parseFloat(row.querySelector('.harga_satuan').value);
-    const subtotal    = qty * harga_satuan;
+  document.querySelectorAll('.product-row').forEach(row => {
+    const id_produk = row.querySelector('.prod-select').value;
+    const qty = parseInt(row.querySelector('.prod-qty').value) || 0;
+    const harga_satuan = parseFloat(row.querySelector('.prod-price').value) || 0;
+    const subtotal = qty * harga_satuan;
 
-    if (!id_produk || !qty || !harga_satuan) { valid = false; return; }
-
-    items.push({ id_produk, qty, harga_satuan, subtotal });
-    total += subtotal;
+    if (id_produk && qty > 0) {
+      // Trik Multi-Alias Mapping: Mengirimkan variasi nama properti agar fleksibel dengan app.js backend
+      items.push({
+        id_produk: id_produk,
+        id_product: id_produk,
+        product_id: id_produk,
+        
+        qty: qty,
+        quantity: qty,
+        jumlah: qty,
+        
+        harga_satuan: harga_satuan,
+        harga: harga_satuan,
+        price: harga_satuan,
+        
+        subtotal: subtotal
+      });
+      total_bayar += subtotal;
+    }
   });
 
-  if (!valid) {
-    showMessage('error', 'Lengkapi semua field produk!');
+  if (items.length === 0) {
+    alert("Eh, minimal pilih 1 produk dulu dong sebelum disimpan!");
     return;
   }
 
-  const soData = {
-    tanggal_so:   document.getElementById('tanggal_so').value,
-    id_pelanggan: parseInt(document.getElementById('id_pelanggan').value),
-    id_gudang:    parseInt(document.getElementById('id_gudang').value),
-    total_bayar:  total,
-    status_so:    document.getElementById('status_so').value,
-    status_bayar: document.getElementById('status_bayar').value,
-    jatuh_tempo:  document.getElementById('jatuh_tempo').value,
+  // Mengirimkan variasi nama array penampung items agar dibaca sempurna oleh backend
+  const payload = {
+    tanggal_so,
+    jatuh_tempo,
+    id_pelanggan,
+    id_gudang,
+    status_so,
+    status_bayar,
+    total_bayar,
+    items: items,
+    details: items,
+    detail: items,
+    products: items
   };
 
-  if (!soData.id_pelanggan || !soData.id_gudang) {
-    showMessage('error', 'ID Pelanggan dan ID Gudang wajib diisi!');
-    return;
-  }
+  console.log("Data yang siap dikirim ke backend:", payload);
 
   try {
-    // 1. Insert SO dulu
-    const soRes = await fetch(`${BASE_URL}/sales-order`, {
+    const response = await fetch(`${BASE_URL}/sales-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(soData)
+      body: JSON.stringify(payload)
     });
-    const soResult = await soRes.json();
-    if (!soRes.ok) { showMessage('error', soResult.message || 'Gagal membuat SO'); return; }
 
-    // 2. Ambil id_so yang baru dibuat
-    const soListRes = await fetch(`${BASE_URL}/sales-order`);
-    const soList = await soListRes.json();
-    const newSO = soList[soList.length - 1];
-    const id_so = newSO.id_so;
-
-    // 3. Insert detail items
-    for (const item of items) {
-      await fetch(`${BASE_URL}/detail-so`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_so, ...item })
-      });
+    // Validasi ketat jika server mengembalikan error HTTP (400 / 500)
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || `Server error dengan status: ${response.status}`);
     }
 
     showMessage('success', 'Sales order berhasil ditambahkan!');
     setTimeout(() => { window.location.href = 'orders.html'; }, 1500);
 
   } catch (err) {
-    console.error(err);
-    showMessage('error', 'Terjadi kesalahan server');
+    console.error("Gagal menyimpan:", err);
+    showMessage('error', 'Terjadi kesalahan server: ' + err.message);
+    alert("Gagal menyimpan ke database! Cek pesan error merah di bawah atau terminal backend-mu.");
   }
 }
 
@@ -323,9 +413,6 @@ function showMessage(type, text) {
   messageBox.className = `message ${type}`;
   messageBox.innerHTML = text;
 }
-
-// Tambah 1 row default saat load
-addProductRow();
 </script>
 
 </body>
