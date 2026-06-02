@@ -40,10 +40,10 @@
       min-height: 100vh;
     }
 
-    /* ── Left panel ── */
+    /* ── Left panel - hidden ── */
     .auth-left {
+      display: none;
       flex: 1;
-      display: flex;
       align-items: center;
       justify-content: center;
       background: var(--surface);
@@ -58,7 +58,6 @@
       max-width: 360px;
     }
 
-    /* Logo image placeholder */
     .brand-logo {
       width: 220px;
       height: 200px;
@@ -72,11 +71,6 @@
       color: var(--text-light);
       letter-spacing: .04em;
       text-align: center;
-    }
-    .brand-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
     }
 
     .brand-text { margin-top: 8px; }
@@ -105,15 +99,7 @@
       margin-top: 6px;
     }
 
-    /* Divider between panels */
-    .auth-divider {
-      display: none;
-    }
-
-    /* ── Left panel - hidden ── */
-    .auth-left {
-      display: none;
-    }
+    .auth-divider { display: none; }
 
     /* ── Right panel ── */
     .auth-right {
@@ -135,7 +121,6 @@
       gap: 0;
     }
 
-    /* Small logo top of form */
     .form-logo {
       width: 48px;
       height: 48px;
@@ -149,11 +134,6 @@
       color: var(--text-light);
       text-align: center;
       margin-bottom: 18px;
-    }
-    .form-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
     }
 
     .form-title {
@@ -172,7 +152,6 @@
       margin-bottom: 28px;
     }
 
-    /* ── Form fields ── */
     .form-body {
       width: 100%;
       display: flex;
@@ -210,45 +189,50 @@
       box-shadow: 0 0 0 3px rgba(43,94,232,.12);
     }
 
+    /* ── Password Field Wrapper & Eye Button ── */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    
+    .password-wrapper input {
+      padding-right: 44px; /* Memberi ruang untuk tombol mata di kanan */
+    }
+    
+    /* MENYEMBUNYIKAN IKON MATA BAWAAN BROWSER (EDGE / IE / CHROME MODERN) */
+    .password-wrapper input::-ms-reveal,
+    .password-wrapper input::-ms-clear {
+      display: none !important;
+    }
+    
+    .toggle-password-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      user-select: none;
+      outline: none;
+      transition: color 0.18s;
+    }
+    
+    .toggle-password-btn:hover {
+      color: var(--primary);
+    }
+
     .field-hint {
       font-size: 11.5px;
       color: var(--text-light);
       margin-top: -4px;
     }
 
-    /* Remember + Forgot row */
-    .form-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: -4px;
-    }
-
-    .remember {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      color: var(--text-mid);
-      cursor: pointer;
-      user-select: none;
-    }
-    .remember input[type="checkbox"] {
-      width: 15px; height: 15px;
-      accent-color: var(--primary);
-      cursor: pointer;
-    }
-
-    .forgot-link {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--primary);
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .forgot-link:hover { text-decoration: underline; }
-
-    /* Buttons */
     .btn-primary {
       width: 100%;
       padding: 12px;
@@ -266,23 +250,6 @@
     .btn-primary:hover  { background: var(--primary-hov); }
     .btn-primary:active { transform: scale(.98); }
 
-    /* Separator */
-    .form-sep {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-light);
-      font-size: 12px;
-    }
-    .form-sep::before,
-    .form-sep::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* Switch link */
     .form-switch {
       font-size: 13px;
       color: var(--text-mid);
@@ -297,10 +264,8 @@
     }
     .form-switch a:hover { text-decoration: underline; }
 
-    /* ══════════ TOGGLE LOGIN / SIGNUP ══════════ */
     #form-signup { display: none; }
 
-    /* ══════════ RESPONSIVE ══════════ */
     @media (max-width: 700px) {
       .auth-left    { display: none; }
       .auth-divider { display: none; }
@@ -340,7 +305,12 @@
 
         <div class="field">
           <label for="login-password">Password</label>
-          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+          <div class="password-wrapper">
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('login-password', this)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
         </div>
 
         <button class="btn-primary" onclick="handleLogin()">Sign in</button>
@@ -356,7 +326,7 @@
     <div class="form-card" id="form-signup">
       <img src="assets/Object.svg" alt="Logo" width="48" height="48" class="form-logo">
       <h1 class="form-title">Create an account</h1>
-      <p class="form-subtitle">Start your 30-day free trial.</p>
+      <p class="form-subtitle">Start your Journey</p>
 
       <div class="form-body">
         <div class="field">
@@ -371,7 +341,12 @@
 
         <div class="field">
           <label for="signup-password">Password*</label>
-          <input type="password" id="signup-password" placeholder="Create a password" autocomplete="new-password"/>
+          <div class="password-wrapper">
+            <input type="password" id="signup-password" placeholder="Create a password" autocomplete="new-password"/>
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('signup-password', this)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
           <span class="field-hint">Must be at least 8 characters.</span>
         </div>
 
@@ -397,7 +372,44 @@
     document.getElementById('form-login').style.display  = 'flex';
   }
 
-  // Handler untuk login (Bisa menggunakan Nama / Email)
+  // Fungsi Toggle Mata
+  function togglePasswordVisibility(inputId, buttonElement) {
+    const passwordInput = document.getElementById(inputId);
+    if (!passwordInput) return;
+
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      buttonElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+    } else {
+      passwordInput.type = 'password';
+      buttonElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    }
+  }
+
+  // Fitur Tekan Enter untuk Kirim Data
+  document.addEventListener("DOMContentLoaded", function() {
+    const loginInputs = document.querySelectorAll("#form-login input");
+    loginInputs.forEach(input => {
+      input.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          handleLogin();
+        }
+      });
+    });
+
+    const signupInputs = document.querySelectorAll("#form-signup input");
+    signupInputs.forEach(input => {
+      input.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          handleSignup();
+        }
+      });
+    });
+  });
+
+  // Handler Login
   function handleLogin() {
     const identifier = document.getElementById('login-identifier').value;
     const password = document.getElementById('login-password').value;
@@ -407,12 +419,9 @@
       return;
     }
 
-    // Mengirim payload 'identifier' (bisa dibaca backend sebagai email OR name)
     fetch('http://localhost:3000/users/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ identifier, password })
     })
     .then(response => response.json())
@@ -422,7 +431,6 @@
         localStorage.setItem('email', data.user.email);
         localStorage.setItem('role', data.user.role);
         
-        // Pengalihan langsung (Redirect) berbasis Role hasil verifikasi database
         if (data.user.role === 'admin') {
           window.location.replace('dashboard.html');
         } else {
@@ -438,7 +446,7 @@
     });
   }
   
-  // Handler untuk Sign Up (Deteksi Otomatis & Langsung Tembus Dashboard)
+  // Handler Sign Up
   function handleSignup() {
     const name = document.getElementById('signup-name').value;
     const email = document.getElementById('signup-email').value;
@@ -454,7 +462,6 @@
       return;
     }
 
-    // Otomatisasi Role di Frontend
     let role = 'customer';
     if (email.trim().toLowerCase() === 'admin@mitradistribusi.com') {
       role = 'admin';
@@ -462,23 +469,18 @@
     
     fetch('http://localhost:3000/users', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password, role })
     })
     .then(response => response.json())
     .then(data => {
       if (data.message === 'User berhasil ditambahkan' || data.user) {
-        // Ambil payload user dari database atau buat tiruan instan untuk sesi login otomatis
         const activeUser = data.user || { name, email, role };
         
         localStorage.setItem('user', JSON.stringify(activeUser));
         localStorage.setItem('email', email);
         localStorage.setItem('role', role);
 
-        // Perbaikan Utama: Menggunakan window.location.replace() agar langsung meluncur 
-        // ke dashboard tanpa stuck di form otentikasi.
         if (role === 'admin') {
           window.location.replace('dashboard.html');
         } else {
