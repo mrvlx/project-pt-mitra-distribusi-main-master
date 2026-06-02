@@ -1,19 +1,25 @@
 const db = require('../config/db');
 
 exports.getAllPelanggan = (req, res) => {
+    const sql = `
+        SELECT 
+            p.*,
+            COUNT(so.id_so) AS total_orders,
+            COALESCE(SUM(so.total_bayar), 0) AS total_revenue,
+            COALESCE(SUM(CASE WHEN so.status_bayar = 'Belum Lunas' THEN so.total_bayar ELSE 0 END), 0) AS credit_used,
+            ROUND(
+                COALESCE(SUM(CASE WHEN so.status_bayar = 'Belum Lunas' THEN so.total_bayar ELSE 0 END), 0)
+                / NULLIF(p.limit_kredit, 0) * 100, 1
+            ) AS credit_usage_pct
+        FROM pelanggan p
+        LEFT JOIN sales_order so ON p.id_pelanggan = so.id_pelanggan
+        GROUP BY p.id_pelanggan
+    `;
 
-    db.query(
-        'SELECT * FROM pelanggan',
-        (err, result) => {
-
-            if (err) {
-                return res.status(500).json(err);
-            }
-
-            res.json(result);
-
-        }
-    );
+    db.query(sql, (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result);
+    });
 };
 
 exports.getByIdPelanggan = (req, res) => {

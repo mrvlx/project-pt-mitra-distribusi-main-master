@@ -262,12 +262,12 @@
   </nav>
 
   <div class="sidebar-footer">
-    <a class="nav-item" href="#">
-      <img src="assets/setting.svg" width="20" height="20"> Settings
-    </a>
-    <a class="nav-item" href="auth.html">
-      <img src="assets/logout.svg" width="20" height="20"> Log Out
-    </a>
+    <a class="nav-item" href="settings.html">
+  <img src="assets/setting.svg" width="20" height="20"> Settings
+</a>
+    <a class="nav-item" href="#" onclick="logout()">
+  <img src="assets/logout.svg" width="20" height="20"> Log Out
+</a>
   </div>
 </aside>
 
@@ -506,7 +506,10 @@ async function loadCustomers() {
 
   pelanggan.forEach((p, i) => {
     const limit = Number(p.limit_kredit);
-    const hutang = Number(p.sisa_hutang);
+    // Hitung dari sales_order yang belum lunas
+    const hutang = orders
+      .filter(o => Number(o.id_pelanggan) === Number(p.id_pelanggan) && o.status_bayar === 'Belum Lunas')
+      .reduce((sum, o) => sum + Number(o.total_bayar), 0);
     const pct = limit > 0 ? ((hutang / limit) * 100).toFixed(1) : 0;
     const fillClass = pct >= 90 ? 'fill-red' : pct >= 70 ? 'fill-amber' : 'fill-blue';
     const pctClass  = pct >= 90 ? 'pct-red'  : pct >= 70 ? 'pct-amber'  : 'pct-blue';
@@ -544,6 +547,10 @@ async function loadCustomers() {
 }
 
 loadCustomers();
+function logout() {
+  localStorage.clear();
+  window.location.href = 'auth.html';
+}
 </script>
 
 </body>

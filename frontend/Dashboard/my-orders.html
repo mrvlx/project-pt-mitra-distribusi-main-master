@@ -400,9 +400,9 @@
     <a class="nav-item" href="settings.html">
       <img src="assets/setting.svg" class="nav-icon" onerror="this.style.display='none'"> Settings
     </a>
-    <a class="nav-item" href="auth.html">
-      <img src="assets/logout.svg" class="nav-icon" onerror="this.style.display='none'"> Log Out
-    </a>
+  <a class="nav-item" href="#" onclick="logout()">
+  <img src="assets/logout.svg" width="20" height="20"> Log Out
+</a>
   </div>
 </aside>
 
@@ -623,6 +623,11 @@
     if (event.target == modal) {
       modal.style.display = 'none';
     }
+  
+  }
+  function logout() {
+  localStorage.clear();
+  window.location.href = 'auth.html';
   }
 </script>
 

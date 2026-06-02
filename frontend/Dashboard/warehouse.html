@@ -316,9 +316,9 @@
     <a class="nav-item" href="settings.html">
       <img src="assets/setting.svg" width="20" height="20"> Settings
     </a>
-    <a class="nav-item" href="auth.html">
-      <img src="assets/logout.svg" width="20" height="20"> Log Out
-    </a>
+    <a class="nav-item" href="#" onclick="logout()">
+  <img src="assets/logout.svg" width="20" height="20"> Log Out
+</a>
   </div>
 </aside>
 
@@ -641,6 +641,10 @@ async function loadWarehouse() {
 }
 
 loadWarehouse();
+function logout() {
+  localStorage.clear();
+  window.location.href = 'auth.html';
+}
 </script>
 
 </body>

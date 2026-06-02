@@ -91,18 +91,24 @@ exports.updateUser = (req, res) => {
     const { id } = req.params;
     const { name, email, password, role } = req.body;
 
-    const sql = `
-        UPDATE users
-        SET name = ?, email = ?, password = ?, role = ?
-        WHERE id_user = ?
-    `;
+    const fields = [];
+    const params = [];
 
-    db.query(sql, [name, email, password, role, id], (err, result) => {
+    if (name)     { fields.push('name = ?');     params.push(name); }
+    if (email)    { fields.push('email = ?');    params.push(email); }
+    if (password) { fields.push('password = ?'); params.push(password); }
+    if (role)     { fields.push('role = ?');     params.push(role); }
+
+    if (fields.length === 0) {
+        return res.status(400).json({ message: 'Tidak ada field yang diupdate' });
+    }
+
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id_user = ?`;
+    params.push(id);
+
+    db.query(sql, params, (err, result) => {
         if (err) return res.status(500).json(err);
-
-        res.json({
-            message: 'User berhasil diupdate'
-        });
+        res.json({ message: 'User berhasil diupdate' });
     });
 };
 

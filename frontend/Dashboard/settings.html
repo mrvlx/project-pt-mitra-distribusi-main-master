@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PT Mitra Distribusi — Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #F4F6FB;
+      --surface:   #FFFFFF;
+      --primary:   #2B5EE8;
+      --primary-lt:#EEF2FD;
+      --green:     #16A34A;
+      --green-lt:  #DCFCE7;
+      --red:       #DC2626;
+      --red-lt:    #FEE2E2;
+      --text-dark: #1A1D2E;
+      --text-mid:  #5A607A;
+      --text-light:#9AA3B8;
+      --border:    #E8ECF4;
+      --shadow:    0 2px 12px rgba(30,40,80,.07);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --sidebar-w: 220px;
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-dark); display: flex; min-height: 100vh; font-size: 14px; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 100; padding: 0 0 24px;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 20px 20px 16px; }
+    .logo-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .logo-text span:first-child { font-size: 10px; font-weight: 500; color: var(--text-light); letter-spacing: .04em; text-transform: uppercase; }
+    .logo-text span:last-child { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text-mid); font-weight: 500; font-size: 13.5px; text-decoration: none; transition: background .15s, color .15s; }
+    .nav-item:hover { background: var(--bg); color: var(--text-dark); }
+    .nav-item.active { background: var(--primary-lt); color: var(--primary); }
+    .sidebar-footer { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ══ HEADER ══ */
+    .header {
+      height: 64px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 28px; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .search-bar { flex: 1; max-width: 400px; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 100px; padding: 8px 16px; color: var(--text-light); font-size: 13px; }
+    .search-bar input { border: none; background: transparent; outline: none; color: var(--text-dark); font-family: var(--font); font-size: 13px; width: 100%; }
+    .search-bar input::placeholder { color: var(--text-light); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .notif-btn { width: 36px; height: 36px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--surface); position: absolute; top: 4px; right: 4px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; cursor: pointer; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ══ CONTENT ══ */
+    .content { padding: 28px; display: flex; flex-direction: column; gap: 24px; max-width: 800px; }
+
+    /* ══ PAGE HEADER ══ */
+    .page-title { font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
+    .page-subtitle { font-size: 13px; color: var(--text-light); }
+
+    /* ══ SETTINGS TABS ══ */
+    .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; width: fit-content; }
+    .tab { padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-mid); transition: all .15s; border: none; background: transparent; font-family: var(--font); }
+    .tab.active { background: var(--primary); color: #fff; }
+
+    /* ══ CARD ══ */
+    .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+
+    /* ══ PROFILE HEADER ══ */
+    .profile-header {
+      padding: 28px 28px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 20px;
+    }
+    .avatar-large {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 800; flex-shrink: 0;
+    }
+    .profile-info h2 { font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
+    .profile-info p { font-size: 13px; color: var(--text-light); }
+    .role-badge {
+      display: inline-block; margin-top: 6px;
+      padding: 3px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 700;
+      background: var(--primary-lt); color: var(--primary);
+    }
+
+    /* ══ FORM SECTION ══ */
+    .form-section { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+    .section-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label { font-size: 13px; font-weight: 600; color: var(--text-mid); }
+    input, select {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      outline: none; font-family: var(--font); font-size: 14px;
+      transition: border-color .2s; background: white; color: var(--text-dark);
+    }
+    input:focus, select:focus { border-color: var(--primary); }
+    input:read-only { background: var(--bg); color: var(--text-mid); cursor: not-allowed; }
+
+    /* ══ DIVIDER ══ */
+    .divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    /* ══ ACTIONS ══ */
+    .form-actions {
+      padding: 20px 28px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .btn-save {
+      padding: 11px 24px; background: var(--primary); color: #fff;
+      border: none; border-radius: var(--radius-sm); font-family: var(--font);
+      font-size: 13.5px; font-weight: 700; cursor: pointer; transition: background .15s;
+    }
+    .btn-save:hover { background: #1F4DC5; }
+    .btn-cancel {
+      padding: 11px 24px; background: var(--bg); color: var(--text-mid);
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font);
+      font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background .15s;
+    }
+    .btn-cancel:hover { background: var(--border); }
+
+    /* ══ ALERT ══ */
+    .alert { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; display: none; margin: 0 28px 20px; }
+    .alert-success { background: var(--green-lt); color: var(--green); border: 1px solid #bbf7d0; }
+    .alert-error { background: var(--red-lt); color: var(--red); border: 1px solid #fecaca; }
+
+    /* ══ DANGER ZONE ══ */
+    .danger-zone { padding: 24px 28px; }
+    .danger-title { font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 12px; }
+    .danger-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #fecaca; border-radius: var(--radius-sm); background: var(--red-lt); }
+    .danger-info h4 { font-size: 13.5px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+    .danger-info p { font-size: 12px; color: var(--text-mid); }
+    .btn-danger { padding: 9px 18px; background: var(--red); color: #fff; border: none; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; }
+
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <img src="assets/Object.svg" alt="Logo">
+    </div>
+    <div class="logo-text">
+      <span>PT</span>
+      <span>Mitra Distribusi</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html"><img src="assets/dashboard.svg" width="20" height="20"> Dashboard</a>
+    <a class="nav-item" href="inventory.html"><img src="assets/inventory.svg" width="20" height="20"> Inventory</a>
+    <a class="nav-item" href="reports.html"><img src="assets/report.svg" width="20" height="20"> Reports</a>
+    <a class="nav-item" href="suppliers.html"><img src="assets/supplier.svg" width="20" height="20"> Suppliers</a>
+    <a class="nav-item" href="orders.html"><img src="assets/order.svg" width="20" height="20"> Orders</a>
+    <a class="nav-item" href="warehouse.html"><img src="assets/Warehouse.svg" width="20" height="20"> Warehouse</a>
+    <a class="nav-item" href="purchase.html"><img src="assets/purchase.svg" width="20" height="20"> Purchase Orders</a>
+    <a class="nav-item" href="customers.html"><img src="assets/customer.svg" width="20" height="20"> Customers</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item active" href="settings.html"><img src="assets/setting.svg" width="20" height="20"> Settings</a>
+    <a class="nav-item" href="auth.html"><img src="assets/logout.svg" width="20" height="20"> Log Out</a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <header class="header">
+    <div class="search-bar">
+      <img src="assets/search.svg" width="16" height="16">
+      <input type="text" placeholder="Search product, supplier, order…">
+    </div>
+    <div class="header-right">
+      <div class="notif-btn">
+        <img src="assets/notif.svg" width="20" height="20">
+        <span class="notif-dot"></span>
+      </div>
+      <div class="avatar">
+        <img src="assets/profil.svg" alt="User Avatar">
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Kelola profil dan preferensi akun Anda</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('profile')">Profile</button>
+      <button class="tab" onclick="switchTab('password')">Ubah Password</button>
+    </div>
+
+    <!-- Profile Tab -->
+    <div id="tab-profile" class="card">
+      <!-- Profile Header -->
+      <div class="profile-header">
+        <div class="avatar-large" id="avatar-initials">A</div>
+        <div class="profile-info">
+          <h2 id="profile-name-display">Memuat...</h2>
+          <p id="profile-email-display">-</p>
+          <span class="role-badge" id="profile-role-display">-</span>
+        </div>
+      </div>
+
+      <!-- Alert -->
+      <div class="alert alert-success" id="alert-success">✓ Profil berhasil diperbarui!</div>
+      <div class="alert alert-error" id="alert-error">✗ Gagal memperbarui profil.</div>
+
+      <!-- Form -->
+      <div class="form-section">
+        <div class="section-title">Informasi Akun</div>
+        <div class="form-grid">
+
+          <div class="form-group full">
+            <label>Nama Lengkap</label>
+            <input type="text" id="name" placeholder="Nama lengkap">
+          </div>
+
+          <div class="form-group full">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="email@domain.com">
+          </div>
+
+          <div class="form-group">
+            <label>Role</label>
+            <input type="text" id="role" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>Member Sejak</label>
+            <input type="text" id="created_at" readonly>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="loadProfile()">Reset</button>
+        <button class="btn-save" onclick="saveProfile()">Simpan Perubahan</button>
+      </div>
+    </div>
+
+    <!-- Password Tab -->
+    <div id="tab-password" class="card" style="display:none;">
+      <div class="alert alert-success" id="alert-pw-success">✓ Password berhasil diubah!</div>
+      <div class="alert alert-error" id="alert-pw-error">✗ Gagal mengubah password.</div>
+
+      <div class="form-section">
+        <div class="section-title">Ubah Password</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Password Baru</label>
+            <input type="password" id="new-password" placeholder="Masukkan password baru">
+          </div>
+          <div class="form-group full">
+            <label>Konfirmasi Password</label>
+            <input type="password" id="confirm-password" placeholder="Ulangi password baru">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <div></div>
+        <button class="btn-save" onclick="savePassword()">Ubah Password</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const API = 'http://localhost:3000';
+const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+let currentUserId = savedUser.id || 1;
+let userData = {};
+
+// Redirect kalau bukan admin
+if (savedUser.role !== 'admin') {
+  window.location.href = 'customer_dashboard.html';
+}
+
+async function loadProfile() {
+  try {
+    const res = await fetch(`${API}/users`);
+    const users = await res.json();
+    const user = users.find(u => u.id_user == currentUserId) || users[0];
+    userData = user;
+    currentUserId = user.id_user;
+
+    // Update tampilan header
+    document.getElementById('profile-name-display').textContent = user.name;
+    document.getElementById('profile-email-display').textContent = user.email;
+    document.getElementById('profile-role-display').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    document.getElementById('avatar-initials').textContent = user.name.charAt(0).toUpperCase();
+
+    // Update form
+    document.getElementById('name').value = user.name;
+    document.getElementById('email').value = user.email;
+    document.getElementById('role').value = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    document.getElementById('created_at').value = new Date(user.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function saveProfile() {
+  const name  = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+
+  try {
+    const res = await fetch(`${API}/users/${currentUserId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email })
+    });
+
+    if (res.ok) {
+      showAlert('alert-success');
+      loadProfile();
+    } else {
+      showAlert('alert-error');
+    }
+  } catch (err) {
+    showAlert('alert-error');
+  }
+}
+
+async function savePassword() {
+  const newPw  = document.getElementById('new-password').value;
+  const confPw = document.getElementById('confirm-password').value;
+
+  if (!newPw || newPw !== confPw) {
+    document.getElementById('alert-pw-error').textContent = '✗ Password tidak cocok!';
+    showAlert('alert-pw-error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/users/${currentUserId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: newPw })
+    });
+
+    if (res.ok) {
+      showAlert('alert-pw-success');
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-password').value = '';
+    } else {
+      showAlert('alert-pw-error');
+    }
+  } catch (err) {
+    showAlert('alert-pw-error');
+  }
+}
+
+function showAlert(id) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-profile').style.display = 'none';
+  document.getElementById('tab-password').style.display = 'none';
+
+  if (tab === 'profile') {
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    document.getElementById('tab-profile').style.display = 'block';
+  } else {
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.getElementById('tab-password').style.display = 'block';
+  }
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>
